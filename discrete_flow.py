@@ -4,8 +4,8 @@ from scipy import spatial as sp
 import pyflann as fl
 #DAISY deo
 flann = fl.FLANN()
-pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/000000_10.png')
-pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/000000_11.png')
+pic1 = cv2.imread('../data_scene_flow/image_2/000000_10.png')
+pic2 = cv2.imread('../data_scene_flow/image_2/000000_11.png')
 #print(pic1)
 picw = 400 #valjalo bi da je parno
 pich = 150
