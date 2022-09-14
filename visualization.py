@@ -130,7 +130,7 @@ flow = cv2.calcOpticalFlowFarneback(old_gray, frame_gray, None, 0.5, 3, 15, 3, 5
 # cv2.waitKey(0)
 
 groundt = FlowImage()
-groundt.readFlowField("C:/Users/Milica/Desktop/data_scene_flow/training/flow_noc/000001_10.png")
+groundt.readFlowField("../data_scene_flow/training/flow_noc/000001_10.png")
 
 br = 0
 for v in range(test.height):
