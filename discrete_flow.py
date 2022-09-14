@@ -20,7 +20,7 @@ picw = 240 #valjalo bi da je parno
 pich = 100
 pic3 = cv2.resize(pic1,(picw,pich))
 pic4 = cv2.resize(pic2,(picw,pich))
-tphi = 1
+tphi = 2.5
 tpsi=10
 lamda=0.05
 unpacktime=0.0
@@ -277,6 +277,8 @@ psicosts=np.zeros((maxnprop,maxnprop))
 #        mat1[qi,qj]=qi
 #        mat2[qi,qj]=qj
 def bcd(ystep,xstep,ty,tx):
+    global unpacktime
+    global truestime
     trues=np.nonzero([1,1,1,1,1,1,1,1,1,1])
     if(ystep==0):
         xside=1
@@ -435,6 +437,8 @@ for ty in range(pich):
         finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
 print('unpacking',unpacktime)
 print('trues',truestime)
+print(finalpic[25])
+print(finalpic[:,25])
 #np.save('flow_nakon_10',finalpic)
 
 '''
