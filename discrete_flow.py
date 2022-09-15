@@ -6,22 +6,25 @@ from scipy import spatial as sp
 import pyflann as fl
 import datetime as dt
 #DAISY deo
+
+print(dt.datetime.now())
+
 flann = fl.FLANN()
 
-'''
-pic1 = cv2.imread('../data_scene_flow/testing/image_2/000000_10.png') !!!!!!!!!!OVO JE TACNO
+
+pic1 = cv2.imread('../data_scene_flow/testing/image_2/000000_10.png') 
 pic2 = cv2.imread('../data_scene_flow/testing/image_2/000000_11.png')
 ''' 
 pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
 pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
-
+'''
 #print(pic1)
-picw = 240 #valjalo bi da je parno
-pich = 100
+picw = 1242 #valjalo bi da je parno
+pich = 375
 pic3 = cv2.resize(pic1,(picw,pich))
 pic4 = cv2.resize(pic2,(picw,pich))
 tphi = 2.5
-tpsi=10
+tpsi=15
 lamda=0.05
 unpacktime=0.0
 truestime=0.0
@@ -68,7 +71,7 @@ def purepsi(yv1,xv1,yv2,xv2):
 
 #treba podeliti sliku na celije
 
-cellw = 40
+cellw = 54
 cellh = 25
 ncellx = picw//cellw #oko 20
 ncelly = pich//cellh #oko 10
@@ -135,7 +138,7 @@ for ci in range(ncellx):
 print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
 
 ngauss = 25
-sigma = 5
+sigma = 8
 for x in range(picw):
     for y in range(pich):
         
@@ -173,7 +176,7 @@ print(lcosts[50,122])
 
 
 #treba uzeti minvecove i raditi dinamicko s njima red po red. treba izracunati K(p,p+-1,l)
-bcd_times = 1
+bcd_times = 6
 ystep=0
 xstep=0
 bigtpsi=tpsi+cellw+cellh
@@ -242,7 +245,7 @@ ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 #a
 np.save('pakovani3',packedksets)
 
-print(-1)
+print(dt.datetime.now())
 
 #packedksets = np.load('pakovani3.npy')
 
@@ -386,6 +389,7 @@ def bcd(ystep,xstep,ty,tx):
                 dp[i][tl]=mincost+smallcosts
                 '''
                 #RESETAVAJ TRUES
+                t1=dt.datetime.now()
                 trues= np.nonzero(ksets[:pnprop,tl])
                 #if(tl==0): print('oblik',np.shape(trues)) 
                 for tk in trues[0]:
@@ -394,7 +398,9 @@ def bcd(ystep,xstep,ty,tx):
                         mincost=mybcost
                         pastlabels[i][tl]=tk
                 dp[i][tl]=mincost+smallcosts
-                
+                t2=dt.datetime.now()
+                delta=t2-t1
+                truestime=truestime+delta.microseconds/1000000
     #sad rekonstrukcija
     #uzmem min dp[posl-1]
     ty-=ystep
@@ -439,28 +445,6 @@ print('unpacking',unpacktime)
 print('trues',truestime)
 print(finalpic[25])
 print(finalpic[:,25])
-#np.save('flow_nakon_10',finalpic)
+np.save('veliki_flow_nakon_1',finalpic)
 
-'''
-ovo vise ne radi zbog reshape
-for i in range(500000):
-    norms[i]=np.linalg.norm(descrs[i])
-print(norms.shape)
-pic5 = np.reshape(norms,((500,1000)))
-cv2.imshow('q',pic5)
-cv2.waitKey(0)
-'''
-
-'''
-#..................................................NEBITNO (Sortiranje Gausa)
-sortorder = np.zeros(maxnprop,dtype=int)
-for x in range(picw):
-    for y in range(pich):
-        sortorder = np.argsort(lcosts[y,x])
-        lcosts=lcosts[:,:,sortorder]
-        proposals=proposals[:,:,sortorder,:]
-        print('ee!',lcosts[y,x])
-
-print(proposals[33,33]) #Radi !
-print(lcosts[33,33])
-'''
+print(dt.datetime.now())
