@@ -5,6 +5,7 @@ import numpy as np
 from scipy import spatial as sp
 import pyflann as fl
 import datetime as dt
+import numba as nb
 #DAISY deo
 
 print(dt.datetime.now())
@@ -315,7 +316,7 @@ def bcd(ystep,xstep,ty,tx):
         elif(ystep==0 and xstep==1):
             ksets=np.reshape(np.unpackbits(packedksets[ty,tx-1,1])[:maxnprop*maxnprop],(maxnprop,maxnprop))
         else:
-            ksets=np.resize(np.unpackbits(packedksets[ty,tx,1])[:maxnprop*maxnprop],(maxnprop,maxnprop))
+            ksets=np.reshape(np.unpackbits(packedksets[ty,tx,1])[:maxnprop*maxnprop],(maxnprop,maxnprop))
             #dp[i,0:nprop[ty,tx]]=np.max(dp[i-1,0:nprop[ty-ystep,tx-xstep]]+np.where(ksets4[0,0:nprop[ty-ystep,tx-xstep],0:nprop[ty,tx]],  psi(ty-ystep,tx-xstep, uf-ovo-nije-sidepsi, ty,tx), tpsi))
         t2=dt.datetime.now()
         delta=t2-t1
