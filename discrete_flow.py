@@ -433,8 +433,8 @@ def bcd(ystep,xstep,ty,tx):
         pl=pastlabels[i][pl]
         i-=1
         bestlabels[ty,tx]=pl
-    print(bestlabels)
-    print(pastlabels)
+    #print(bestlabels)
+    #print(pastlabels)
 
     return dp
 print(bestlabels[35])
@@ -446,7 +446,7 @@ for w in range(bcd_times):
     print(bestlabels[35])
     for yloc in range(0,pich,2):
         bcd(0,-1,yloc,picw-1)
-    for xloc in range((picw//2)*2-1,-1,-2):    #NE MOZE OVAKO AS NEPARNIM BROJEM
+    for xloc in range((picw//2)*2-1,-1,-2):   
         bcd(-1,0,pich-1,xloc)
     for yloc in range((pich//2)*2-1,-1,-2):
         bcd(0,1,yloc,0)
@@ -459,6 +459,6 @@ print('unpacking',unpacktime)
 print('trues',truestime)
 print(finalpic[25])
 print(finalpic[:,25])
-#np.save('mali_flow_nakon_6',finalpic)
+np.save('veliki_flow_nakon_1',finalpic)
 
 print(dt.datetime.now())
