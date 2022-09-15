@@ -5,7 +5,6 @@ import numpy as np
 from scipy import spatial as sp
 import pyflann as fl
 import datetime as dt
-import numba as nb
 #DAISY deo
 
 print(dt.datetime.now())
@@ -22,10 +21,14 @@ pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
 #print(pic1)
 picw = 1242
 pich = 375
-# x = 700
+#x = 700
 x = 0
-# y = 122
+#y = 122
 y = 0
+cellw = 54
+cellh = 25
+#cellw=25
+#cellh=25
 tphi = 2.5
 tpsi=15
 lamda=0.05
@@ -34,6 +37,10 @@ truestime=0.0
 
 pic3 = pic1[y:y+pich, x:x+picw, :]
 pic4 = pic2[y:y+pich, x:x+picw, :]
+
+testtrues=np.nonzero([0,0,0])
+print(testtrues[0])
+print('a')
 #
 #testdp = (np.full((2*max(pich,picw),150),1000.0)).tolist()
 #print(testdp[0][1])
@@ -77,8 +84,6 @@ def purepsi(yv1,xv1,yv2,xv2):
 
 #treba podeliti sliku na celije
 
-cellw = 54
-cellh = 25
 ncellx = picw//cellw #oko 20
 ncelly = pich//cellh #oko 10
 #maxflowdist = 100
@@ -172,8 +177,8 @@ for x in range(picw):
 #nisu unique
 #ovako uvek ima 50 random suseda pa su u coskovima slike gusci
 
-print(proposals[50,122]) #Radi !
-print(lcosts[50,122])
+print(proposals[35,11]) #Radi !
+print(lcosts[35,11])
 #for y in range(pich):
 #    for x in range(picw):
 #        print(y,x,ngaussprop[y,x])
@@ -288,6 +293,7 @@ psicosts=np.zeros((maxnprop,maxnprop))
 def bcd(ystep,xstep,ty,tx):
     global unpacktime
     global truestime
+    minarr=np.zeros(50,dtype=int)
     trues=np.nonzero([1,1,1,1,1,1,1,1,1,1])
     if(ystep==0):
         xside=1
@@ -296,10 +302,10 @@ def bcd(ystep,xstep,ty,tx):
         xside=0
         yside=1
     i = 0
-    dp = (np.full((2*max(pich,picw),maxnprop),1000.0)).tolist()
+    dp = (np.full((2*max(pich,picw),maxnprop),1000.0))
     pastlabels = (np.full((2*max(pich,picw),maxnprop),1000,dtype=int)).tolist()
     for tl in range(nprop[ty,tx]):
-        dp[0][tl]=sidepsi(ty,tx,tl, ty+yside, tx+xside) + sidepsi(ty,tx,tl, ty-yside, tx-xside) + lcosts[ty,tx,tl]
+        dp[0,tl]=sidepsi(ty,tx,tl, ty+yside, tx+xside) + sidepsi(ty,tx,tl, ty-yside, tx-xside) + lcosts[ty,tx,tl]
     while(True):
         #ksets je prosli u DP
         #
@@ -329,8 +335,8 @@ def bcd(ystep,xstep,ty,tx):
         permmincost=10000.0
         permminlabel=-8
         for tk in range(pnprop):
-            if(tpsi+dp[i-1][tk]<permmincost):
-                permmincost=tpsi+dp[i-1][tk]
+            if(tpsi+dp[i-1,tk]<permmincost):
+                permmincost=tpsi+dp[i-1,tk]
                 permminlabel=tk
 
         if(ystep==-1 or xstep==-1):
@@ -351,17 +357,13 @@ def bcd(ystep,xstep,ty,tx):
                             pastlabels[i][tl]=tk
                 dp[i][tl]=mincost+smallcosts
                 '''            
-                t1=dt.datetime.now()
                 trues= np.nonzero(ksets[tl,:pnprop])
-                for tk in trues[0]:
-                    mybcost=dp[i-1][tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
-                    if(mybcost<mincost):
-                        mincost=mybcost
-                        pastlabels[i][tl]=tk
-                dp[i][tl]=mincost+smallcosts
-                t2=dt.datetime.now()
-                delta=t2-t1
-                truestime=truestime+delta.microseconds/1000000
+                if(trues[0].size>0):
+                    minarr=dp[i-1,trues[0]]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,trues[0],0],proposals[ty-ystep,tx-xstep,trues[0],1])
+                    mincost=np.min(minarr)
+                    pastlabels[i][tl]=np.argmin(minarr)
+                dp[i,tl]=mincost+smallcosts
+
                 #if(ty==50):
                 #    print('oblik',np.shape(trues))
                 
@@ -373,7 +375,8 @@ def bcd(ystep,xstep,ty,tx):
                 #BUDI JAKO PAZLJIV SVE OVDE MOZE BITI NETACNO
                 #for tl in range(nprop[ty-1,tx]):
                 #    for tk in range(nprop[ty,tx]):
-                #        if(ksets4[0,tl,tk]):
+                #        if(ksets4[0,tl,tk]):\
+                 
                 #            psicosts[tl,tk]=purepsi(proposals[ty-1,tx,tl,0],proposals[ty-1,tx,tl,1],proposals[ty,tx,tk,0],proposals[ty,tx,tk,1])
         else:
             for tl in range(tnprop):
@@ -395,18 +398,21 @@ def bcd(ystep,xstep,ty,tx):
                 dp[i][tl]=mincost+smallcosts
                 '''
                 #RESETAVAJ TRUES
-                t1=dt.datetime.now()
                 trues= np.nonzero(ksets[:pnprop,tl])
                 #if(tl==0): print('oblik',np.shape(trues)) 
+                '''
                 for tk in trues[0]:
                     mybcost=dp[i-1][tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
                     if(mybcost<mincost):
                         mincost=mybcost
                         pastlabels[i][tl]=tk
-                dp[i][tl]=mincost+smallcosts
-                t2=dt.datetime.now()
-                delta=t2-t1
-                truestime=truestime+delta.microseconds/1000000
+                '''
+                if(trues[0].size>0):
+                    minarr=dp[i-1,trues[0]]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,trues[0],0],proposals[ty-ystep,tx-xstep,trues[0],1])
+                    mincost=np.min(minarr)
+                    pastlabels[i][tl]=np.argmin(minarr)
+                dp[i,tl]=mincost+smallcosts
+
     #sad rekonstrukcija
     #uzmem min dp[posl-1]
     ty-=ystep
@@ -415,8 +421,8 @@ def bcd(ystep,xstep,ty,tx):
     mincost=10000.0
     minlabel=0
     for tl in range(nprop[ty,tx]):
-        if(dp[i][tl]<mincost):
-            mincost=dp[i][tl]
+        if(dp[i,tl]<mincost):
+            mincost=dp[i,tl]
             minlabel=tl
     bestlabels[ty,tx]=minlabel
     pl=minlabel
@@ -427,20 +433,22 @@ def bcd(ystep,xstep,ty,tx):
         pl=pastlabels[i][pl]
         i-=1
         bestlabels[ty,tx]=pl
+    print(bestlabels)
+    print(pastlabels)
 
     return dp
-print(bestlabels[50])
+print(bestlabels[35])
 for w in range(bcd_times):
     for xloc in range(0,picw,2):
         bcd(1,0,0,xloc)
         #print('a')
     #print(nprop[50])
-    print(bestlabels[50])
+    print(bestlabels[35])
     for yloc in range(0,pich,2):
         bcd(0,-1,yloc,picw-1)
-    for xloc in range(picw-1,-1,-2):
+    for xloc in range((picw//2)*2-1,-1,-2):    #NE MOZE OVAKO AS NEPARNIM BROJEM
         bcd(-1,0,pich-1,xloc)
-    for yloc in range(pich-1,-1,-2):
+    for yloc in range((pich//2)*2-1,-1,-2):
         bcd(0,1,yloc,0)
 
 finalpic=np.zeros((pich,picw,2))
@@ -451,6 +459,6 @@ print('unpacking',unpacktime)
 print('trues',truestime)
 print(finalpic[25])
 print(finalpic[:,25])
-np.save('mali_flow_nakon_6',finalpic)
+#np.save('mali_flow_nakon_6',finalpic)
 
 print(dt.datetime.now())
