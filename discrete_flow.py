@@ -12,22 +12,27 @@ print(dt.datetime.now())
 flann = fl.FLANN()
 
 
-pic1 = cv2.imread('../data_scene_flow/testing/image_2/000000_10.png') 
-pic2 = cv2.imread('../data_scene_flow/testing/image_2/000000_11.png')
+pic1 = cv2.imread('../data_scene_flow/training/image_2/000000_10.png') 
+pic2 = cv2.imread('../data_scene_flow/training/image_2/000000_11.png')
 ''' 
 pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
 pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
 '''
 #print(pic1)
-picw = 1242 #valjalo bi da je parno
+picw = 1242
 pich = 375
-pic3 = cv2.resize(pic1,(picw,pich))
-pic4 = cv2.resize(pic2,(picw,pich))
+# x = 700
+x = 0
+# y = 122
+y = 0
 tphi = 2.5
 tpsi=15
 lamda=0.05
 unpacktime=0.0
 truestime=0.0
+
+pic3 = pic1[y:y+pich, x:x+picw, :]
+pic4 = pic2[y:y+pich, x:x+picw, :]
 #
 #testdp = (np.full((2*max(pich,picw),150),1000.0)).tolist()
 #print(testdp[0][1])
@@ -176,7 +181,7 @@ print(lcosts[50,122])
 
 
 #treba uzeti minvecove i raditi dinamicko s njima red po red. treba izracunati K(p,p+-1,l)
-bcd_times = 6
+bcd_times = 1
 ystep=0
 xstep=0
 bigtpsi=tpsi+cellw+cellh
@@ -445,6 +450,6 @@ print('unpacking',unpacktime)
 print('trues',truestime)
 print(finalpic[25])
 print(finalpic[:,25])
-np.save('veliki_flow_nakon_1',finalpic)
+np.save('mali_flow_nakon_6',finalpic)
 
 print(dt.datetime.now())
