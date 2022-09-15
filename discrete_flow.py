@@ -420,11 +420,11 @@ def bcd(ystep,xstep,ty,tx):
     bestlabels[ty,tx]=minlabel
     pl=minlabel
     while(True):
-        pl=pastlabels[i][pl]
-        i-=1
         ty-=ystep
         tx-=xstep
         if(tx<0 or ty<0 or tx>=picw or ty>=pich): break
+        pl=pastlabels[i][pl]
+        i-=1
         bestlabels[ty,tx]=pl
 
     return dp
