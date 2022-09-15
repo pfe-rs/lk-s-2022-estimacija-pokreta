@@ -226,8 +226,8 @@ for ty in range(pich-1):
 
                 neiy=ty
                 neix=tx+1
-        packedksets[ty,tx,0]=np.packbits(ksets4[0])
-        packedksets[ty,tx,1]=np.packbits(ksets4[1])
+        packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+        packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
         ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 ty=pich-1
 for tx in range(picw-1):
@@ -236,7 +236,7 @@ for tx in range(picw-1):
         neix=tx+1
         neiy=ty
         ksets4[1,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
-    packedksets[ty,tx,1]=np.packbits(ksets4[1])
+    packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
 tx=picw-1
 for ty in range(pich-1):
     for tl in range(nprop[ty,tx]):
@@ -244,7 +244,7 @@ for ty in range(pich-1):
         neix=tx
         neiy=ty+1
         ksets4[0,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
-    packedksets[ty,tx,0]=np.packbits(ksets4[0])
+    packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
 
 ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 
