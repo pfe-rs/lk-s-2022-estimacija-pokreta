@@ -162,9 +162,9 @@ for x in range(picw):
                     tv=proposals[tgy,tgx,bestlabels[tgy,tgx]]
                     if((tv not in proposals[y,x,broj:broj+5]) and (tv not in proposals[y,x,(nprop[y,x]-ngaussprop[y,x]):nprop[y,x]])):
                         proposals[y,x,nprop[y,x]]=tv
+                        lcosts[y,x,nprop[y,x]]=min(tphi,abs(np.sum(descrs1[y,x]-descrs2[tgy,tgx])))
                         nprop[y,x]+=1
                         ngaussprop[y,x]+=1
-                        lcosts[y,x,nprop[y,x]]=min(tphi,abs(np.sum(descrs1[y,x]-descrs2[tgy,tgx])))
                     
                     i+=1
                     
