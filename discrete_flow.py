@@ -357,7 +357,7 @@ def bcd(ystep,xstep,ty,tx):
                             pastlabels[i][tl]=tk
                 dp[i,tl]=mincost+smallcosts
                          
-                dp[i,tl]=mincost+smallcosts
+                #dp[i,tl]=mincost+smallcosts
 
                 #if(ty==50):
                 #    print('oblik',np.shape(trues))
@@ -395,7 +395,7 @@ def bcd(ystep,xstep,ty,tx):
                 #RESETAVAJ TRUES
                 
                 #if(tl==0): print('oblik',np.shape(trues)) 
-                dp[i,tl]=mincost+smallcosts
+                #dp[i,tl]=mincost+smallcosts
 
     #sad rekonstrukcija
     #uzmem min dp[posl-1]
