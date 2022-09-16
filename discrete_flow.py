@@ -19,20 +19,20 @@ pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
 pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
 '''
 #print(pic1)
-#picw = 1242
-#pich = 375
-picw=240
-pich=125
+picw = 1242
+pich = 375
+#picw=240
+#pich=125
 #x = 700
-x = 900
+x = 0
 #y = 122
-y = 100
-#cellw = 54
-#cellh = 25
-cellw=50
-cellh=25
+y = 0
+cellw = 54
+cellh = 25
+#cellw=50
+#cellh=25
 tphi = 2.5
-tpsi=15
+tpsi=8
 lamda=0.05
 unpacktime=0.0
 truestime=0.0
@@ -145,6 +145,7 @@ for ci in range(ncellx):
                 nprop[y,x]+=5
 
 
+np.save('veliki_baby_flow',bestlabels)
 
 print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
 
@@ -183,7 +184,6 @@ print(lcosts[35,11])
 #    for x in range(picw):
 #        print(y,x,ngaussprop[y,x])
 #pazi, sada su u proposalu vektori a ne destinacije
-
 
 
 #treba uzeti minvecove i raditi dinamicko s njima red po red. treba izracunati K(p,p+-1,l)
