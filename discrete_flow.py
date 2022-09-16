@@ -414,7 +414,26 @@ def bcd(ystep,xstep,ty,tx):
         ty-=ystep
         tx-=xstep
         if(i<0): print('i je manje od 0',ty,tx,i,pl)
-        if(pl==1000): print('pl je 1000',ty,tx,i,pl)
+        if(pl==1000): 
+            print('pl je 1000',ty,tx,i,pl)
+            print(proposals[ty-1,tx-1])
+            print(proposals[ty-1,tx])
+            print(proposals[ty-1,tx+1])
+            print(proposals[ty,tx-1])
+            print(proposals[ty,tx])
+            print(proposals[ty,tx+1])
+            print(proposals[ty+1,tx-1])
+            print(proposals[ty+1,tx])
+            print(proposals[ty+1,tx+1])
+            print(bestlabels[ty-1,tx-1])
+            print(bestlabels[ty-1,tx])
+            print(bestlabels[ty-1,tx+1])
+            print(bestlabels[ty,tx-1])
+            print(bestlabels[ty,tx])
+            print(bestlabels[ty,tx+1])
+            print(bestlabels[ty+1,tx-1])
+            print(bestlabels[ty+1,tx])
+            print(bestlabels[ty+1,tx+1])
         if(tx<0 or ty<0 or tx>=picw or ty>=pich): break
         pl=pastlabels[i][pl]
         i-=1
