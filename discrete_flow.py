@@ -19,16 +19,18 @@ pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
 pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
 '''
 #print(pic1)
-picw = 1242
-pich = 375
+#picw = 1242
+#pich = 375
+picw=240
+pich=125
 #x = 700
-x = 0
+x = 900
 #y = 122
-y = 0
-cellw = 54
-cellh = 25
-#cellw=25
-#cellh=25
+y = 100
+#cellw = 54
+#cellh = 25
+cellw=50
+cellh=25
 tphi = 2.5
 tpsi=15
 lamda=0.05
@@ -38,8 +40,6 @@ truestime=0.0
 pic3 = pic1[y:y+pich, x:x+picw, :]
 pic4 = pic2[y:y+pich, x:x+picw, :]
 
-testtrues=np.nonzero([0,0,0])
-print(testtrues[0])
 print('a')
 #
 #testdp = (np.full((2*max(pich,picw),150),1000.0)).tolist()
@@ -346,22 +346,17 @@ def bcd(ystep,xstep,ty,tx):
                 af, bf = proposals[ty,tx,tl,0], proposals[ty,tx,tl,1]
                 pastlabels[i][tl]=permminlabel
 
-                #myb[:pnprop]=np.where(ksets[tl,:pnprop], dp[i-1][:pnprop]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,:pnprop,0],proposals[ty-ystep,tx-xstep,:pnprop,1]), mincost)
-                #dp[i][tl]=np.min(myb[:pnprop])+smallcosts
-                '''
+                #myb[:pnprop]=np.where(ksets[tl,:pnprop], dp[i-1,:pnprop]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,:pnprop,0],proposals[ty-ystep,tx-xstep,:pnprop,1]), mincost)
+                #dp[i,tl]=np.min(myb[:pnprop])+smallcosts
+                
                 for tk in range(pnprop):
                     if(ksets[tl,tk]):
-                        mybcost=dp[i-1][tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
+                        mybcost=dp[i-1,tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
                         if(mybcost<mincost):
                             mincost=mybcost
                             pastlabels[i][tl]=tk
-                dp[i][tl]=mincost+smallcosts
-                '''            
-                trues= np.nonzero(ksets[tl,:pnprop])
-                if(trues[0].size>0):
-                    minarr=dp[i-1,trues[0]]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,trues[0],0],proposals[ty-ystep,tx-xstep,trues[0],1])
-                    mincost=np.min(minarr)
-                    pastlabels[i][tl]=np.argmin(minarr)
+                dp[i,tl]=mincost+smallcosts
+                         
                 dp[i,tl]=mincost+smallcosts
 
                 #if(ty==50):
@@ -385,32 +380,21 @@ def bcd(ystep,xstep,ty,tx):
                 af, bf = proposals[ty,tx,tl,0], proposals[ty,tx,tl,1]
                 pastlabels[i][tl]=permminlabel
 
-                #myb[:pnprop]=np.where(ksets[:pnprop,tl], dp[i-1][:pnprop]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,:pnprop,0],proposals[ty-ystep,tx-xstep,:pnprop,1]), mincost)
-                #dp[i][tl]=np.min(myb[:pnprop])+smallcosts
+                #myb[:pnprop]=np.where(ksets[:pnprop,tl], dp[i-1,:pnprop]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,:pnprop,0],proposals[ty-ystep,tx-xstep,:pnprop,1]), mincost)
+                #dp[i,tl]=np.min(myb[:pnprop])+smallcosts
 
-                '''
+                
                 for tk in range(pnprop):
                     if(ksets[tk,tl]):
-                        mybcost=dp[i-1][tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
+                        mybcost=dp[i-1,tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
                         if(mybcost<mincost):
                             mincost=mybcost
                             pastlabels[i][tl]=tk
-                dp[i][tl]=mincost+smallcosts
-                '''
+                dp[i,tl]=mincost+smallcosts
+                
                 #RESETAVAJ TRUES
-                trues= np.nonzero(ksets[:pnprop,tl])
+                
                 #if(tl==0): print('oblik',np.shape(trues)) 
-                '''
-                for tk in trues[0]:
-                    mybcost=dp[i-1][tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
-                    if(mybcost<mincost):
-                        mincost=mybcost
-                        pastlabels[i][tl]=tk
-                '''
-                if(trues[0].size>0):
-                    minarr=dp[i-1,trues[0]]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,trues[0],0],proposals[ty-ystep,tx-xstep,trues[0],1])
-                    mincost=np.min(minarr)
-                    pastlabels[i][tl]=np.argmin(minarr)
                 dp[i,tl]=mincost+smallcosts
 
     #sad rekonstrukcija
