@@ -303,7 +303,7 @@ def bcd(ystep,xstep,ty,tx):
         yside=1
     i = 0
     dp = (np.full((2*max(pich,picw),maxnprop),1000.0))
-    pastlabels = (np.full((2*max(pich,picw),maxnprop),1000,dtype=int)).tolist()
+    pastlabels = (np.full((2*max(pich,picw),maxnprop+1),1000,dtype=int)).tolist()
     for tl in range(nprop[ty,tx]):
         dp[0,tl]=sidepsi(ty,tx,tl, ty+yside, tx+xside) + sidepsi(ty,tx,tl, ty-yside, tx-xside) + lcosts[ty,tx,tl]
     while(True):
@@ -413,6 +413,8 @@ def bcd(ystep,xstep,ty,tx):
     while(True):
         ty-=ystep
         tx-=xstep
+        if(i<0): print('i je manje od 0',ty,tx,i,pl)
+        if(pl==1000): print('pl je 1000',ty,tx,i,pl)
         if(tx<0 or ty<0 or tx>=picw or ty>=pich): break
         pl=pastlabels[i][pl]
         i-=1
