@@ -144,12 +144,14 @@ for ci in range(ncellx):
                    # if(dists[0,qi]==0.0): print("alo",y,x,cj*cellh+res[qi]//cellw,ci*cellw+res[qi]%cellw)
                 nprop[y,x]+=5
 
+
 finalpic=np.zeros((pich,picw,2))
 for ty in range(pich):
     for tx in range(picw):
         finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
 np.save('veliki_baby_flow',finalpic)
-
+np.save('proposals_pre_gausa',proposals)
+np.save('lcosts_pre_gausa',lcosts)
 print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
 
 ngauss = 25
@@ -207,7 +209,14 @@ for ty in range(pich):
     for tx in range(picw):
         finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
 
+
+finalpic=np.zeros((pich,picw,2))
+for ty in range(pich):
+    for tx in range(picw):
+        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
 np.save('bebaflow',finalpic)
+np.save('proposals_pre_gausa',proposals)
+np.save('lcosts_pre_gausa',lcosts)
 
 
 
@@ -468,5 +477,33 @@ print('trues',truestime)
 print(finalpic[25])
 print(finalpic[:,25])
 np.save('veliki_flow_nakon_1',finalpic)
+
+
+#JOS JEDAN BCD
+
+print(dt.datetime.now())
+
+for w in range(bcd_times):
+    for xloc in range(0,picw,2):
+        bcd(1,0,0,xloc)
+        #print('a')
+    #print(nprop[50])
+    print(bestlabels[35])
+    for yloc in range(0,pich,2):
+        bcd(0,-1,yloc,picw-1)
+    for xloc in range((picw//2)*2-1,-1,-2):   
+        bcd(-1,0,pich-1,xloc)
+    for yloc in range((pich//2)*2-1,-1,-2):
+        bcd(0,1,yloc,0)
+
+finalpic=np.zeros((pich,picw,2))
+for ty in range(pich):
+    for tx in range(picw):
+        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
+print('unpacking',unpacktime)
+print('trues',truestime)
+print(finalpic[25])
+print(finalpic[:,25])
+np.save('veliki_flow_nakon_2',finalpic)
 
 print(dt.datetime.now())
