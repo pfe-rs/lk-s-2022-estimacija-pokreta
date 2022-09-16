@@ -12,8 +12,8 @@ print(dt.datetime.now())
 flann = fl.FLANN()
 
 
-pic1 = cv2.imread('../data_scene_flow/training/image_2/000000_10.png') 
-pic2 = cv2.imread('../data_scene_flow/training/image_2/000000_11.png')
+pic1 = cv2.imread('../data_scene_flow/training/image_2/000002_11.png') 
+pic2 = cv2.imread('../data_scene_flow/training/image_2/000002_10.png')
 ''' 
 pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
 pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
@@ -90,7 +90,7 @@ ncelly = pich//cellh #oko 10
 celldescrs2 = np.zeros((ncellx*ncelly,cellw*cellh,68), dtype=np.float32)
 maxnprop = 150
 proposals = np.full((pich,picw,maxnprop,2),-1, dtype = int)
-lcosts = np.full((pich,picw,maxnprop),1000.0)
+lcosts = np.full((pich,picw,maxnprop),1000.0, dtype=np.double)
 nprop = np.zeros((pich,picw), dtype=int)
 ngaussprop=np.zeros((pich,picw),dtype=int)
 mindists = np.full((pich,picw), 1000.0)
@@ -149,7 +149,7 @@ finalpic=np.zeros((pich,picw,2))
 for ty in range(pich):
     for tx in range(picw):
         finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
-np.save('veliki_baby_flow',finalpic)
+np.save('fildevi/no_bcd_000002_backwards',finalpic)
 np.save('proposals_pre_gausa',proposals)
 np.save('lcosts_pre_gausa',lcosts)
 print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
@@ -504,6 +504,6 @@ print('unpacking',unpacktime)
 print('trues',truestime)
 print(finalpic[25])
 print(finalpic[:,25])
-np.save('veliki_flow_nakon_2',finalpic)
+np.save('bcd_2_000002_backward',finalpic)
 
 print(dt.datetime.now())
