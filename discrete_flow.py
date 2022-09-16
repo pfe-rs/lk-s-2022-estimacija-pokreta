@@ -144,8 +144,11 @@ for ci in range(ncellx):
                    # if(dists[0,qi]==0.0): print("alo",y,x,cj*cellh+res[qi]//cellw,ci*cellw+res[qi]%cellw)
                 nprop[y,x]+=5
 
-
-np.save('veliki_baby_flow',bestlabels)
+finalpic=np.zeros((pich,picw,2))
+for ty in range(pich):
+    for tx in range(picw):
+        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
+np.save('veliki_baby_flow',finalpic)
 
 print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
 
