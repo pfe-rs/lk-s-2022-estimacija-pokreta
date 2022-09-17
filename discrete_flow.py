@@ -335,10 +335,10 @@ def pakovanjeZaC():
         #packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
         if(tx%2==0): packedksets0[tx//2,ty,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
         if(tx%2==1): packedksets2[(picw-1-tx)//2,(pich-1-ty),:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
-    np.save('Dobri fajlovi/pakovani za c 0',packedksets0)
-    np.save('Dobri fajlovi/pakovani za c 1',packedksets1)
-    np.save('Dobri fajlovi/pakovani za c 2',packedksets2)
-    np.save('Dobri fajlovi/pakovani za c 3',packedksets3)
+    np.save('Dobri fajlovi2/pakovani za c 0',packedksets0)
+    np.save('Dobri fajlovi2/pakovani za c 1',packedksets1)
+    np.save('Dobri fajlovi2/pakovani za c 2',packedksets2)
+    np.save('Dobri fajlovi2/pakovani za c 3',packedksets3)
     ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 #a
 
