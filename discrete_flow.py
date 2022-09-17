@@ -53,18 +53,45 @@ print('a')
 #cv2.imshow('r',pic3)
 #daisy = cv2.xfeatures2d.DAISY_create([, 5[, 4[, 4[, 4[, norm[, H[, interpolation[, use_orientation]]]]]]]])
 daisy = cv2.xfeatures2d.DAISY_create(radius=5,q_radius=4,q_theta=4,q_hist=4)
-kp = [cv2.KeyPoint(x, y, 1) for y in range(pich) for x in range(picw)]
-print('poc')
-descrsold = np.zeros((pich*picw,68))
-kp, descrsold = daisy.compute(pic3, kp)
-print(descrsold.shape)
-descrs1= np.zeros((pich,picw,68),dtype=np.float32)
-descrs1 = np.reshape(descrsold,((pich,picw,68)))
+def izracunajDaisy(picture):
+    kp = [cv2.KeyPoint(x, y, 1) for y in range(pich) for x in range(picw)]
+    print('poc')
+    descrsold = np.zeros((pich*picw,68))
+    kp, descrsold = daisy.compute(picture, kp)
+    print(descrsold.shape)
+    descrs1= np.zeros((pich,picw,68),dtype=np.float32)
+    descrs1 = np.reshape(descrsold,((pich,picw,68)))
+    return descrs1
 
-kp = [cv2.KeyPoint(x, y, 1) for y in range(pich) for x in range(picw)]
-kp, descrsold = daisy.compute(pic4, kp)
-descrs2 = np.zeros((pich,picw,68),dtype=np.float32)
-descrs2 = np.reshape(descrsold,((pich,picw,68)))
+
+
+
+
+descrs1= np.zeros((pich,picw,68),dtype=np.float32)
+descrs2= np.zeros((pich,picw,68),dtype=np.float32)
+bcd_times = 5
+bigtpsi=tpsi+cellw+cellh
+
+ncellx = picw//cellw #oko 20
+ncelly = pich//cellh #oko 10
+#maxflowdist = 100
+maxnprop = 150
+proposals = np.full((pich,picw,maxnprop,2),-1, dtype = int)
+lcosts = np.full((pich,picw,maxnprop),1000.0,dtype=np.double)
+nprop = np.zeros((pich,picw), dtype=int)
+#ngaussprop=np.zeros((pich,picw),dtype=int)
+mindists = np.full((pich,picw), 1000.0)
+#minvecs=np.zeros((pich,picw,2), dtype=int)
+bestlabels=np.zeros((pich,picw), dtype=int)
+
+
+kdim=maxnprop*maxnprop//8+1
+packedksets=np.zeros((pich,picw,2,kdim),dtype=np.uint8) #cuva labele, ne psi
+
+ksets=np.zeros((maxnprop,maxnprop),dtype=bool)
+tv=np.zeros(2,dtype=int)
+myb=np.zeros(maxnprop)
+
 
 
 def sidepsi(y1,x1,label1,y2,x2):
@@ -83,20 +110,6 @@ def purepsi(yv1,xv1,yv2,xv2):
 
 
 #treba podeliti sliku na celije
-
-ncellx = picw//cellw #oko 20
-ncelly = pich//cellh #oko 10
-#maxflowdist = 100
-celldescrs2 = np.zeros((ncellx*ncelly,cellw*cellh,68), dtype=np.float32)
-maxnprop = 150
-proposals = np.full((pich,picw,maxnprop,2),-1, dtype = int)
-lcosts = np.full((pich,picw,maxnprop),1000.0)
-nprop = np.zeros((pich,picw), dtype=int)
-ngaussprop=np.zeros((pich,picw),dtype=int)
-mindists = np.full((pich,picw), 1000.0)
-#minvecs=np.zeros((pich,picw,2), dtype=int)
-bestlabels=np.zeros((pich,picw), dtype=int)
-
 def check1(yl,xl,yv,xv):
     
     #cellxl=
@@ -113,73 +126,91 @@ def check1(yl,xl,yv,xv):
 
 #print(check1(23,50,66,1))
 
-for tci in range(ncellx):
-    for tcj in range(ncelly):
-        celldescrs2[tci+tcj*ncellx]=np.reshape(descrs2[tcj*cellh:(1+tcj)*cellh,tci*cellw:(1+tci)*cellw],(cellw*cellh,68))
+celldescrs2 = np.zeros((ncellx*ncelly,cellw*cellh,68), dtype=np.float32)
+
+def napraviCD2():
+    for tci in range(ncellx):
+        for tcj in range(ncelly):
+            celldescrs2[tci+tcj*ncellx]=np.reshape(descrs2[tcj*cellh:(1+tcj)*cellh,tci*cellw:(1+tci)*cellw],(cellw*cellh,68))
+
 #print(descrs1[123,234])
 #print(celldescrs2[3,45])
 
 #napravim kdtree za trenutnu celiju
 #uzmem sve piksele u okolini, nadjem K proposala za njih
-for ci in range(ncellx):
-    for cj in range(ncelly):
-        params = flann.build_index(pts=celldescrs2[ci+cj*ncellx])
-        #print('bQ',(celldescrs[0]).dtype.type)
-        #print(params)
-        for x in range(max(0,cellw*(ci-2)),min(picw,cellw*(ci+3))):
-            for y in range(max(0,cellh*(cj-2)),min(pich,cellh*(cj+3))):
-                #print('aQ',(descrs[y,x]).dtype.type)
-                res, dists = flann.nn_index(qpts=descrs1[y,x],num_neighbors=5) #k neighbours je 5, i dole je implementirano
-                proposals[y,x,nprop[y,x]:nprop[y,x]+5,1]=ci*cellw+res[0]%cellw-x #proposals[,,,0] je y a [,,,1] je x
-                proposals[y,x,nprop[y,x]:nprop[y,x]+5,0]=cj*cellh+res[0]//cellw-y
-                for qq in range(5):
-                    lcosts[y,x,nprop[y,x]+qq]=min(tphi,np.sum(np.absolute(descrs1[y,x]-celldescrs2[ci+cj*ncellx,res[0,qq]]))) #!!!!!!!!
-                    if(lcosts[y,x,nprop[y,x]+qq]<mindists[y,x]):
-                        mindists[y,x]=lcosts[y,x,nprop[y,x]+qq]
-                        #minvecs[y,x]=proposals[y,x,nprop[y,x]+qq]
-                        bestlabels[y,x]=nprop[y,x]+qq
-                #lcosts[y,x,nprop[y,x]:nprop[y,x]+5]=dists
-                #print("afesfadgws", res.shape)
-                #for qi in range(5):
-                   # if(dists[0,qi]==0.0): print("alo",y,x,cj*cellh+res[qi]//cellw,ci*cellw+res[qi]%cellw)
-                nprop[y,x]+=5
+def generisi():
+    global proposals
+    global lcosts
+    global bestlabels
+    global nprop
+    for ci in range(ncellx):
+        for cj in range(ncelly):
+            params = flann.build_index(pts=celldescrs2[ci+cj*ncellx])
+            #print('bQ',(celldescrs[0]).dtype.type)
+            #print(params)
+            for x in range(max(0,cellw*(ci-2)),min(picw,cellw*(ci+3))):
+                for y in range(max(0,cellh*(cj-2)),min(pich,cellh*(cj+3))):
+                    #print('aQ',(descrs[y,x]).dtype.type)
+                    res, dists = flann.nn_index(qpts=descrs1[y,x],num_neighbors=5) #k neighbours je 5, i dole je implementirano
+                    proposals[y,x,nprop[y,x]:nprop[y,x]+5,1]=ci*cellw+res[0]%cellw-x #proposals[,,,0] je y a [,,,1] je x
+                    proposals[y,x,nprop[y,x]:nprop[y,x]+5,0]=cj*cellh+res[0]//cellw-y
+                    for qq in range(5):
+                        lcosts[y,x,nprop[y,x]+qq]=min(tphi,np.sum(np.absolute(descrs1[y,x]-celldescrs2[ci+cj*ncellx,res[0,qq]]))) #!!!!!!!!
+                        if(lcosts[y,x,nprop[y,x]+qq]<mindists[y,x]):
+                            mindists[y,x]=lcosts[y,x,nprop[y,x]+qq]
+                            #minvecs[y,x]=proposals[y,x,nprop[y,x]+qq]
+                            bestlabels[y,x]=nprop[y,x]+qq
+                    #lcosts[y,x,nprop[y,x]:nprop[y,x]+5]=dists
+                    #print("afesfadgws", res.shape)
+                    #for qi in range(5):
+                    # if(dists[0,qi]==0.0): print("alo",y,x,cj*cellh+res[qi]//cellw,ci*cellw+res[qi]%cellw)
+                    nprop[y,x]+=5
 
 
-finalpic=np.zeros((pich,picw,2))
-for ty in range(pich):
-    for tx in range(picw):
-        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
-np.save('veliki_baby_flow',finalpic)
-np.save('proposals_pre_gausa',proposals)
-np.save('lcosts_pre_gausa',lcosts)
-print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
+def vratiKonacniFlow():
+    finalpic=np.zeros((pich,picw,2))
+    for ty in range(pich):
+        for tx in range(picw):
+            finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
+    return finalpic
 
-ngauss = 25
-sigma = 8
-for x in range(picw):
-    for y in range(pich):
-        
-        mincellyl=max(0,y//cellh-2)
-        #maxcellyl=
-        ncellyl=min(ncelly, y//cellh+2)-mincellyl
-        mincellxl=max(0,x//cellw-2)
+def sacuvajPodatke0():
+    np.save('Dobri fajlovi/veliki_baby_flow',vratiKonacniFlow())
+    np.save('Dobri fajlovi/proposals_pre_gausa',proposals)
+    np.save('Dobri fajlovi/lcosts_pre_gausa',lcosts)
+    np.save('Dobri fajlovi/nprop pre gausa',nprop)
+    print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
 
-        i=0
-        while(i<ngauss):
-            tgy = int(np.random.normal(y,sigma))
-            if(tgy>=0 and tgy<pich):
-                tgx = int(np.random.normal(x,sigma))
-                if(tgx>=0 and tgx<picw):
-                    broj=5*((tgy//cellh-mincellyl)+(tgx//cellw-mincellxl)*ncellyl)
-                    tv=proposals[tgy,tgx,bestlabels[tgy,tgx]]
-                    if((tv not in proposals[y,x,broj:broj+5]) and (tv not in proposals[y,x,(nprop[y,x]-ngaussprop[y,x]):nprop[y,x]])):
-                        proposals[y,x,nprop[y,x]]=tv
-                        lcosts[y,x,nprop[y,x]]=min(tphi,abs(np.sum(descrs1[y,x]-descrs2[tgy,tgx])))
-                        nprop[y,x]+=1
-                        ngaussprop[y,x]+=1
-                    
-                    i+=1
-                    
+
+def nasumicni():
+    ngaussprop=np.zeros((pich,picw),dtype=int)
+    ngauss = 25
+    sigma = 8
+    for x in range(picw):
+        for y in range(pich):
+            
+            mincellyl=max(0,y//cellh-2)
+            #maxcellyl=
+            ncellyl=min(ncelly, y//cellh+2)-mincellyl
+            mincellxl=max(0,x//cellw-2)
+
+            i=0
+            while(i<ngauss):
+                tgy = int(np.random.normal(y,sigma))
+                if(tgy>=0 and tgy<pich):
+                    tgx = int(np.random.normal(x,sigma))
+                    if(tgx>=0 and tgx<picw):
+                        broj=5*((tgy//cellh-mincellyl)+(tgx//cellw-mincellxl)*ncellyl)
+                        tv=proposals[tgy,tgx,bestlabels[tgy,tgx]]
+                        if((tv not in proposals[y,x,broj:broj+5]) and (tv not in proposals[y,x,(nprop[y,x]-ngaussprop[y,x]):nprop[y,x]])):
+                            proposals[y,x,nprop[y,x]]=tv
+                            lcosts[y,x,nprop[y,x]]=min(tphi,abs(np.sum(descrs1[y,x]-descrs2[tgy,tgx])))
+                            nprop[y,x]+=1
+                            ngaussprop[y,x]+=1
+                        
+                        i+=1
+
+
 #nisu unique
 #ovako uvek ima 50 random suseda pa su u coskovima slike gusci
 
@@ -192,87 +223,82 @@ print(lcosts[35,11])
 
 
 #treba uzeti minvecove i raditi dinamicko s njima red po red. treba izracunati K(p,p+-1,l)
-bcd_times = 1
-ystep=0
-xstep=0
-bigtpsi=tpsi+cellw+cellh
-
-kdim=maxnprop*maxnprop//8+1
-packedksets=np.zeros((pich,picw,2,kdim),dtype=np.uint8) #cuva labele, ne psi
-ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool) #gornji za mene, levi za mene, moj za donji, moj za desni (smrt)
-ksets=np.zeros((maxnprop,maxnprop),dtype=bool)
-tv=np.zeros(2,dtype=int)
-myb=np.zeros(maxnprop)
-
-finalpic=np.zeros((pich,picw,2))
-for ty in range(pich):
-    for tx in range(picw):
-        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
 
 
-finalpic=np.zeros((pich,picw,2))
-for ty in range(pich):
-    for tx in range(picw):
-        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
-np.save('bebaflow',finalpic)
-np.save('proposals_pre_gausa',proposals)
-np.save('lcosts_pre_gausa',lcosts)
+def sacuvajPodatke1():
+    np.save('Dobri fajlovi/bebaflow',vratiKonacniFlow())
+    np.save('Dobri fajlovi/proposals_nakon_gausa',proposals)
+    np.save('Dobri fajlovi/lcosts_nakon_gausa',lcosts)
+    np.save('Dobri fajlovi/nprop',nprop)
 
 
+def pakovanje():
+    global packedksets
+    ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool) #gornji za mene, levi za mene, moj za donji, moj za desni (smrt)
+    for ty in range(pich-1):
+        print('pocinjem red y=',ty)
+        for tx in range(picw-1):
+            for tl in range(nprop[ty,tx]):
+                tv = proposals[ty,tx,tl]
+                neix=tx
+                neiy=ty+1
+                for qw in range(2):
+                    
+                    #................................................sporije
+                    #for neil in range(nprop[neiy,neix]):
+                    #    neiv=proposals[neiy,neix,neil]
+                    #    raz=purepsi(tv[0],tv[1],neiv[0],neiv[1])
+                    #    if(raz>bigtpsi):
+                    #        neil=5*(neil//5+1)
+                    #    elif(raz<tpsi):
+                    #        ksets4[qw,tl,neil]=True
+                    
+                    ksets4[qw,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
 
-for ty in range(pich-1):
-    print('pocinjem red y=',ty)
+
+                    neiy=ty
+                    neix=tx+1
+            packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+            packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
+            ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
+    ty=pich-1
     for tx in range(picw-1):
+        for tl in range(nprop[ty,tx]):
+            tv = proposals[ty,tx,tl]
+            neix=tx+1
+            neiy=ty
+            ksets4[1,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
+        packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
+    tx=picw-1
+    for ty in range(pich-1):
         for tl in range(nprop[ty,tx]):
             tv = proposals[ty,tx,tl]
             neix=tx
             neiy=ty+1
-            for qw in range(2):
-                
-                #................................................sporije
-                #for neil in range(nprop[neiy,neix]):
-                #    neiv=proposals[neiy,neix,neil]
-                #    raz=purepsi(tv[0],tv[1],neiv[0],neiv[1])
-                #    if(raz>bigtpsi):
-                #        neil=5*(neil//5+1)
-                #    elif(raz<tpsi):
-                #        ksets4[qw,tl,neil]=True
-                
-                ksets4[qw,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
-
-
-                neiy=ty
-                neix=tx+1
+            ksets4[0,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
         packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
-        packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
-        ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
-ty=pich-1
-for tx in range(picw-1):
-    for tl in range(nprop[ty,tx]):
-        tv = proposals[ty,tx,tl]
-        neix=tx+1
-        neiy=ty
-        ksets4[1,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
-    packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
-tx=picw-1
-for ty in range(pich-1):
-    for tl in range(nprop[ty,tx]):
-        tv = proposals[ty,tx,tl]
-        neix=tx
-        neiy=ty+1
-        ksets4[0,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
-    packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+    np.save('Dobri fajlovi/pakovani',packedksets)
+    ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 
-ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 
 #a
-np.save('pakovani3',packedksets)
 
 print(dt.datetime.now())
 
 #packedksets = np.load('pakovani3.npy')
 
-
+def ucitajSvePodatkeDoBCD():
+    global proposals
+    global lcosts
+    global nprop
+    global packedksets
+    global bestlabels
+    proposals=np.load('Dobri fajlovi/proposals_nakon_gausa.npy')
+    lcosts=np.load('Dobri fajlovi/lcosts_nakon_gausa.npy')
+    nprop=np.load('Dobri fajlovi/nprop.npy')
+    packedksets = np.load('Dobri fajlovi/pakovani.npy')
+    bestlabels=np.load('Dobri fajlovi/bestlabels.npy')
+    
 
 #testiranje
 
@@ -294,8 +320,6 @@ np.save('evoga1',ksets4[1,:nprop[34,70],:nprop[34,71]])
 print('.')
 '''
 
-print(0)
-psicosts=np.zeros((maxnprop,maxnprop))
 #mat1=np.zeros((maxnprop,maxnprop))
 #mat2=np.zeros((maxnprop,maxnprop))
 #for qi in range(maxnprop):
@@ -305,6 +329,8 @@ psicosts=np.zeros((maxnprop,maxnprop))
 def bcd(ystep,xstep,ty,tx):
     global unpacktime
     global truestime
+    global bestlabels
+    blabels=bestlabels
     minarr=np.zeros(50,dtype=int)
     trues=np.nonzero([1,1,1,1,1,1,1,1,1,1])
     if(ystep==0):
@@ -361,12 +387,11 @@ def bcd(ystep,xstep,ty,tx):
                 #myb[:pnprop]=np.where(ksets[tl,:pnprop], dp[i-1,:pnprop]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,:pnprop,0],proposals[ty-ystep,tx-xstep,:pnprop,1]), mincost)
                 #dp[i,tl]=np.min(myb[:pnprop])+smallcosts
                 
-                for tk in range(pnprop):
-                    if(ksets[tl,tk]):
-                        mybcost=dp[i-1,tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
-                        if(mybcost<mincost):
-                            mincost=mybcost
-                            pastlabels[i][tl]=tk
+                trues=np.nonzero(ksets[tl,:pnprop])
+                if(trues[0].size>0):
+                    minarr=(dp[i-1,trues[0]]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,trues[0],0],proposals[ty-ystep,tx-xstep,trues[0],1]))
+                    mincost=np.min(minarr)
+                    pastlabels[i][tl]=trues[0][np.argmin(minarr)]
                 dp[i,tl]=mincost+smallcosts
                          
                 #dp[i,tl]=mincost+smallcosts
@@ -395,13 +420,19 @@ def bcd(ystep,xstep,ty,tx):
                 #myb[:pnprop]=np.where(ksets[:pnprop,tl], dp[i-1,:pnprop]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,:pnprop,0],proposals[ty-ystep,tx-xstep,:pnprop,1]), mincost)
                 #dp[i,tl]=np.min(myb[:pnprop])+smallcosts
 
-                
+                '''
                 for tk in range(pnprop):
                     if(ksets[tk,tl]):
                         mybcost=dp[i-1,tk]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,tk,0],proposals[ty-ystep,tx-xstep,tk,1])
                         if(mybcost<mincost):
                             mincost=mybcost
                             pastlabels[i][tl]=tk
+                '''
+                trues=np.nonzero(ksets[:pnprop,tl])
+                if(trues[0].size>0):
+                    minarr=(dp[i-1,trues[0]]+purepsi(af,bf,proposals[ty-ystep,tx-xstep,trues[0],0],proposals[ty-ystep,tx-xstep,trues[0],1]))
+                    mincost=np.min(minarr)
+                    pastlabels[i][tl]=trues[0][np.argmin(minarr)]
                 dp[i,tl]=mincost+smallcosts
                 
                 #RESETAVAJ TRUES
@@ -414,13 +445,13 @@ def bcd(ystep,xstep,ty,tx):
     ty-=ystep
     tx-=xstep
     i-=1
-    mincost=10000.0
+    mincost=800000.0
     minlabel=0
     for tl in range(nprop[ty,tx]):
         if(dp[i,tl]<mincost):
             mincost=dp[i,tl]
             minlabel=tl
-    bestlabels[ty,tx]=minlabel
+    blabels[ty,tx]=minlabel
     pl=minlabel
     while(True):
         ty-=ystep
@@ -428,82 +459,71 @@ def bcd(ystep,xstep,ty,tx):
         if(i<0): print('i je manje od 0',ty,tx,i,pl)
         if(pl==1000): 
             print('pl je 1000',ty,tx,i,pl)
-            print(proposals[ty-1,tx-1])
-            print(proposals[ty-1,tx])
-            print(proposals[ty-1,tx+1])
-            print(proposals[ty,tx-1])
-            print(proposals[ty,tx])
-            print(proposals[ty,tx+1])
-            print(proposals[ty+1,tx-1])
-            print(proposals[ty+1,tx])
-            print(proposals[ty+1,tx+1])
-            print(bestlabels[ty-1,tx-1])
-            print(bestlabels[ty-1,tx])
-            print(bestlabels[ty-1,tx+1])
-            print(bestlabels[ty,tx-1])
-            print(bestlabels[ty,tx])
-            print(bestlabels[ty,tx+1])
-            print(bestlabels[ty+1,tx-1])
-            print(bestlabels[ty+1,tx])
-            print(bestlabels[ty+1,tx+1])
+            
         if(tx<0 or ty<0 or tx>=picw or ty>=pich): break
         pl=pastlabels[i][pl]
         i-=1
-        bestlabels[ty,tx]=pl
-    #print(bestlabels)
+        blabels[ty,tx]=pl
+    print(bestlabels)
     #print(pastlabels)
 
-    return dp
-print(bestlabels[35])
-for w in range(bcd_times):
-    for xloc in range(0,picw,2):
-        bcd(1,0,0,xloc)
-        #print('a')
-    #print(nprop[50])
-    print(bestlabels[35])
-    for yloc in range(0,pich,2):
-        bcd(0,-1,yloc,picw-1)
-    for xloc in range((picw//2)*2-1,-1,-2):   
-        bcd(-1,0,pich-1,xloc)
-    for yloc in range((pich//2)*2-1,-1,-2):
-        bcd(0,1,yloc,0)
-
-finalpic=np.zeros((pich,picw,2))
-for ty in range(pich):
-    for tx in range(picw):
-        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
-print('unpacking',unpacktime)
-print('trues',truestime)
-print(finalpic[25])
-print(finalpic[:,25])
-np.save('veliki_flow_nakon_1',finalpic)
+    return blabels
+#print(bestlabels[35])
+def ceoBCD():
+    global bestlabels
+    for w in range(bcd_times):
+        for xloc in range(0,picw,2):
+            bestlabels = bcd(1,0,0,xloc)
+            #print('a')
+        #print(nprop[50])
+        print(bestlabels[35])
+        for yloc in range(0,pich,2):
+            bestlabels =bcd(0,-1,yloc,picw-1)
+        print('f')
+        for xloc in range((picw//2)*2-1,-1,-2):   
+            bestlabels =bcd(-1,0,pich-1,xloc)
+        print('g')
+        for yloc in range((pich//2)*2-1,-1,-2):
+            bestlabels =bcd(0,1,yloc,0)
+        
+        np.save('Dobri fajlovi/trenutni_flow',vratiKonacniFlow())
+        np.save('Dobri fajlovi/trenutni bestlabels',bestlabels)
+        print('uradjen bcd broj',w)
 
 
-#JOS JEDAN BCD
+def sracunajBestlabelsKadNemas():
+    for y in range(pich):
+        for x in range(picw):
+            bestlabels[y,x]=np.argmin(lcosts[y,x,:nprop[y,x]])
+    return bestlabels
 
+
+
+
+
+descrs1=izracunajDaisy(pic3)
+descrs2=izracunajDaisy(pic4)
+
+napraviCD2()
+print('napravio')
 print(dt.datetime.now())
+generisi()
+print('generisao')
+print(dt.datetime.now()) 
+sacuvajPodatke0()
+print('sacuvao0')
+print(dt.datetime.now())
+nasumicni()
+print('i ovo')
+print(dt.datetime.now())
+sacuvajPodatke1()
+print('sacuvao1')
+print(dt.datetime.now())
+pakovanje()
+print('spakovao')
+print(dt.datetime.now())
+#ucitajSvePodatkeDoBCD()
 
-for w in range(bcd_times):
-    for xloc in range(0,picw,2):
-        bcd(1,0,0,xloc)
-        #print('a')
-    #print(nprop[50])
-    print(bestlabels[35])
-    for yloc in range(0,pich,2):
-        bcd(0,-1,yloc,picw-1)
-    for xloc in range((picw//2)*2-1,-1,-2):   
-        bcd(-1,0,pich-1,xloc)
-    for yloc in range((pich//2)*2-1,-1,-2):
-        bcd(0,1,yloc,0)
-
-finalpic=np.zeros((pich,picw,2))
-for ty in range(pich):
-    for tx in range(picw):
-        finalpic[ty,tx]=proposals[ty,tx,bestlabels[ty,tx]]
-print('unpacking',unpacktime)
-print('trues',truestime)
-print(finalpic[25])
-print(finalpic[:,25])
-np.save('veliki_flow_nakon_2',finalpic)
+ceoBCD()
 
 print(dt.datetime.now())
