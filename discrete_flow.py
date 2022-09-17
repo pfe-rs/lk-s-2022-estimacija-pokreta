@@ -12,8 +12,8 @@ print(dt.datetime.now())
 flann = fl.FLANN()
 
 
-pic1 = cv2.imread('../data_scene_flow/training/image_2/000000_10.png') 
-pic2 = cv2.imread('../data_scene_flow/training/image_2/000000_11.png')
+pic1 = cv2.imread('../data_scene_flow/training/image_2/000002_10.png') 
+pic2 = cv2.imread('../data_scene_flow/training/image_2/000002_11.png')
 ''' 
 pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
 pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
@@ -175,10 +175,11 @@ def vratiKonacniFlow():
     return finalpic
 
 def sacuvajPodatke0():
-    np.save('Dobri fajlovi/veliki_baby_flow',vratiKonacniFlow())
-    np.save('Dobri fajlovi/proposals_pre_gausa',proposals)
-    np.save('Dobri fajlovi/lcosts_pre_gausa',lcosts)
-    np.save('Dobri fajlovi/nprop pre gausa',nprop)
+    np.save('Dobri fajlovi2/veliki_baby_flow',vratiKonacniFlow())
+    np.save('Dobri fajlovi2/proposals_pre_gausa',proposals)
+    np.save('Dobri fajlovi2/lcosts_pre_gausa',lcosts)
+    np.save('Dobri fajlovi2/nprop pre gausa',nprop)
+    np.save('Dobri fajlovi2/bestlabels',bestlabels)
     print('MINVEC ZA 33 33',bestlabels[33,33],proposals[33,33,bestlabels[33,33]], mindists[33,33])
 
 
@@ -226,10 +227,10 @@ print(lcosts[35,11])
 
 
 def sacuvajPodatke1():
-    np.save('Dobri fajlovi/bebaflow',vratiKonacniFlow())
-    np.save('Dobri fajlovi/proposals_nakon_gausa',proposals)
-    np.save('Dobri fajlovi/lcosts_nakon_gausa',lcosts)
-    np.save('Dobri fajlovi/nprop',nprop)
+    np.save('Dobri fajlovi2/bebaflow',vratiKonacniFlow())
+    np.save('Dobri fajlovi2/proposals_nakon_gausa',proposals)
+    np.save('Dobri fajlovi2/lcosts_nakon_gausa',lcosts)
+    np.save('Dobri fajlovi2/nprop',nprop)
 
 
 def pakovanje():
@@ -277,7 +278,7 @@ def pakovanje():
             neiy=ty+1
             ksets4[0,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
         packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
-    np.save('Dobri fajlovi/pakovani',packedksets)
+    np.save('Dobri fajlovi2/pakovani',packedksets)
     ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 
 
@@ -293,12 +294,12 @@ def ucitajSvePodatkeDoBCD():
     global nprop
     global packedksets
     global bestlabels
-    proposals=np.load('Dobri fajlovi/proposals_nakon_gausa.npy')
-    lcosts=np.load('Dobri fajlovi/lcosts_nakon_gausa.npy')
-    nprop=np.load('Dobri fajlovi/nprop.npy')
-    packedksets = np.load('Dobri fajlovi/pakovani.npy')
-    bestlabels=np.load('Dobri fajlovi/bestlabels.npy')
-    
+    proposals=np.load('Dobri fajlovi2/proposals_nakon_gausa.npy')
+    lcosts=np.load('Dobri fajlovi2/lcosts_nakon_gausa.npy')
+    nprop=np.load('Dobri fajlovi2/nprop.npy')
+    packedksets = np.load('Dobri fajlovi2/pakovani.npy')
+    #bestlabels=np.load('Dobri fajlovi2/bestlabels.npy')
+    bestlabels=sracunajBestlabelsKadNemas()
 
 #testiranje
 
@@ -370,7 +371,7 @@ def bcd(ystep,xstep,ty,tx):
         tnprop=nprop[ty,tx]
         pnprop=nprop[ty-ystep,tx-xstep]
         #psicosts=np.where(ksets4[2,:tnprop,:pnprop], sidepsi(ty,tx,mat1[:tnprop,:pnprop],ty,tx+1),tpsi)
-        permmincost=10000.0
+        permmincost=800000.0
         permminlabel=-8
         for tk in range(pnprop):
             if(tpsi+dp[i-1,tk]<permmincost):
@@ -459,7 +460,9 @@ def bcd(ystep,xstep,ty,tx):
         if(i<0): print('i je manje od 0',ty,tx,i,pl)
         if(pl==1000): 
             print('pl je 1000',ty,tx,i,pl)
-            
+            np.save('error bestlabels',bestlabels)
+            np.save('error pastlabels',pastlabels)
+            np.save('error dp',dp)
         if(tx<0 or ty<0 or tx>=picw or ty>=pich): break
         pl=pastlabels[i][pl]
         i-=1
@@ -486,8 +489,8 @@ def ceoBCD():
         for yloc in range((pich//2)*2-1,-1,-2):
             bestlabels =bcd(0,1,yloc,0)
         
-        np.save('Dobri fajlovi/trenutni_flow',vratiKonacniFlow())
-        np.save('Dobri fajlovi/trenutni bestlabels',bestlabels)
+        np.save('Dobri fajlovi2/trenutni_flow',vratiKonacniFlow())
+        np.save('Dobri fajlovi2/trenutni bestlabels',bestlabels)
         print('uradjen bcd broj',w)
 
 
@@ -522,6 +525,7 @@ print(dt.datetime.now())
 pakovanje()
 print('spakovao')
 print(dt.datetime.now())
+
 #ucitajSvePodatkeDoBCD()
 
 ceoBCD()
