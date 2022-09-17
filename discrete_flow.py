@@ -282,10 +282,10 @@ def pakovanje():
     ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 
 def pakovanjeZaC():
-    packedksets0=np.zeros((picw+1)//2,pich,kdim)
-    packedksets1=np.zeros((pich+1)//2,picw,kdim)
-    packedksets2=np.zeros((picw+1)//2,pich,kdim)
-    packedksets3=np.zeros((pich+1)//2,picw,kdim)
+    packedksets0=np.zeros(((picw+1)//2,pich,kdim))
+    packedksets1=np.zeros(((pich+1)//2,picw,kdim))
+    packedksets2=np.zeros(((picw+1)//2,pich,kdim))
+    packedksets3=np.zeros(((pich+1)//2,picw,kdim))
     ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool) #gornji za mene, levi za mene, moj za donji, moj za desni (smrt)
     for ty in range(pich-1):
         print('pocinjem red y=',ty)
