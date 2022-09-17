@@ -53,6 +53,7 @@ def removeSmallSegments(flow, tresh, min_segment_size):
 def consistencyCheck(flow1, flow2, u1, v1, tresh):
     width, height, _ = flow1.shape
 
+
     #ako nije validan
     if not(flow1[u1][v1][2]> 0.5):
         return
@@ -74,7 +75,7 @@ def consistencyCheck(flow1, flow2, u1, v1, tresh):
 
     du = flow1[u1][v1][0] + flow2[u2][v2][0]
     dv = flow1[u1][v1][1] + flow2[u2][v2][1]
-    err = np.sqrt(du*du + dv*dv)
+    err = np.sqrt(dv*dv + du*du)
     if (err > tresh):
         flow1[u1][v1][0] = 0
         flow1[u1][v1][1] = 0
@@ -82,13 +83,14 @@ def consistencyCheck(flow1, flow2, u1, v1, tresh):
         return
 
 
-def fowardBackwardConsistency(flow1, flow2):
-    for u in range(flow1.shape[1]):
-            for v in range(flow1.shape[0]):
-                consistencyCheck(flow1, flow2, u, v)
 
-    for u in range(flow2.shape[1]):
-            for v in range(flow2.shape[0]):
-                consistencyCheck(flow2, flow1, u, v)
+def fowardBackwardConsistency(flow1, flow2, tresh):
+    for u in range(flow1.shape[0]):
+            for v in range(flow1.shape[1]):
+                consistencyCheck(flow1, flow2, u, v, tresh)
+
+    for u in range(flow2.shape[0]):
+            for v in range(flow2.shape[1]):
+                consistencyCheck(flow2, flow1, u, v, tresh)
 
 
