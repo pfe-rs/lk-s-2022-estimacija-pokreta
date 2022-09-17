@@ -281,6 +281,67 @@ def pakovanje():
     np.save('Dobri fajlovi2/pakovani',packedksets)
     ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
 
+def pakovanjeZaC():
+    packedksets0=np.zeros((picw+1)//2,pich,kdim)
+    packedksets1=np.zeros((pich+1)//2,picw,kdim)
+    packedksets2=np.zeros((picw+1)//2,pich,kdim)
+    packedksets3=np.zeros((pich+1)//2,picw,kdim)
+    ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool) #gornji za mene, levi za mene, moj za donji, moj za desni (smrt)
+    for ty in range(pich-1):
+        print('pocinjem red y=',ty)
+        for tx in range(picw-1):
+            for tl in range(nprop[ty,tx]):
+                tv = proposals[ty,tx,tl]
+                neix=tx
+                neiy=ty+1
+                for qw in range(2):
+                    
+                    #................................................sporije
+                    #for neil in range(nprop[neiy,neix]):
+                    #    neiv=proposals[neiy,neix,neil]
+                    #    raz=purepsi(tv[0],tv[1],neiv[0],neiv[1])
+                    #    if(raz>bigtpsi):
+                    #        neil=5*(neil//5+1)
+                    #    elif(raz<tpsi):
+                    #        ksets4[qw,tl,neil]=True
+                    
+                    ksets4[qw,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
+
+
+                    neiy=ty
+                    neix=tx+1 
+            if(tx%2==0): packedksets0[tx//2,ty,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+            if(ty%2==1): packedksets1[ty//2,(picw-1-tx),:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
+            if(tx%2==1): packedksets2[(picw-1-tx)//2,(pich-1-ty),:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+            if(ty%2==0): packedksets3[(pich-1-ty)//2,tx,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
+            ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
+    ty=pich-1
+    for tx in range(picw-1):
+        for tl in range(nprop[ty,tx]):
+            tv = proposals[ty,tx,tl]
+            neix=tx+1
+            neiy=ty
+            ksets4[1,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
+        #packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
+        if(ty%2==1): packedksets1[ty//2,(picw-1-tx),:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
+        if(ty%2==0): packedksets3[(pich-1-ty)//2,tx,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
+    tx=picw-1
+    for ty in range(pich-1):
+        for tl in range(nprop[ty,tx]):
+            tv = proposals[ty,tx,tl]
+            neix=tx
+            neiy=ty+1
+            ksets4[0,tl,0:nprop[neiy,neix]]=(tpsi>purepsi(tv[0],tv[1],proposals[neiy,neix,0:nprop[neiy,neix],0],proposals[neiy,neix,0:nprop[neiy,neix],1]))
+        #packedksets[ty,tx,0,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+        if(tx%2==0): packedksets0[tx//2,ty,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+        if(tx%2==1): packedksets2[(picw-1-tx)//2,(pich-1-ty),:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[0],maxnprop*maxnprop))
+    np.save('Dobri fajlovi/pakovani za c 0',packedksets0)
+    np.save('Dobri fajlovi/pakovani za c 1',packedksets1)
+    np.save('Dobri fajlovi/pakovani za c 2',packedksets2)
+    np.save('Dobri fajlovi/pakovani za c 3',packedksets3)
+    ksets4=np.zeros((4,maxnprop,maxnprop),dtype=bool)
+#a
+
 
 #a
 
