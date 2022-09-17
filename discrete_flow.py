@@ -464,7 +464,7 @@ def bcd(ystep,xstep,ty,tx):
         pl=pastlabels[i][pl]
         i-=1
         blabels[ty,tx]=pl
-    print(bestlabels)
+    #print(bestlabels)
     #print(pastlabels)
 
     return blabels
