@@ -112,6 +112,7 @@ def errorImage(test, ground_t):
     ABS_THRESH = 3.0
     #REL_THRESH = 0.05
     num_errors = 0
+    br_valid = 0
     image = np.zeros((ground_t.height, ground_t.width,3), np.uint8)
     errs = []
     for v in range(ground_t.height):
@@ -125,11 +126,12 @@ def errorImage(test, ground_t):
                 r, g, b, _ = cmap(min(f_err, 3.0)/3.0)
                 image[v][u] = (np.uint8(b * 255), np.uint8(g * 255), np.uint8(r * 255))
 
+                br_valid += 1
                 if f_err>ABS_THRESH:
                     num_errors+=1
-    errs_np = np.array(errs).mean
+    errs_np = np.average(np.array(errs))
     print('srednja greska', errs_np)
-    print('broj outliera', num_errors)
+    print('procenat outliera', num_errors*100/br_valid)
     cv2.imshow('greska',image)
     
 
@@ -151,17 +153,17 @@ def postProcessing(filename1,filename2, npysave):
 #load ground truth
 groundt = FlowImage()
 # kitti ground truh
-groundt.readFlowFieldFromImage("../data_scene_flow/training/flow_noc/000000_10.png")
+groundt.readFlowFieldFromImage("../data_scene_flow/training/flow_noc/000002_10.png")
 
 #ucitaj discrete flow
-flow = np.load('Dobri fajlovi/bebaflow.npy')
-test = FlowImage()
-test.ucitajFlow(flow, 'discrete')
+# flow = np.load('Dobri fajlovi/bebaflow.npy')
+# test = FlowImage()
+# test.ucitajFlow(flow, 'discrete')
 
 #ucitaj EpicFlow
-# flow = read_flo_file("../epik.flo")
-# test = FlowImage()
-# test.ucitajFlow(flow, 'epik')
+flow = read_flo_file("../epik.flo")
+test = FlowImage()
+test.ucitajFlow(flow, 'epik')
 
 #postprocessing
 # test = postProcessing('fildevi/no_bcd_000002_1.npy', 'fildevi/no_bcd_000002_backwards.npy', 'sredjeni_flow.npy')
