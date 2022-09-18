@@ -160,3 +160,6 @@ def pakovanjeZaC():
     np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 3', packedksets3)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
 # a
+
+pripremi_za_oba_pakovanja()
+pakovanjeZaC()
