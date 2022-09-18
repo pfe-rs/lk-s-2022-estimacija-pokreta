@@ -14,6 +14,7 @@ flann = fl.FLANN()
 
 picindex=sys.argv[1]
 backward=sys.argv[2] #u konzoli, 0 znaci forward, 1 znaci backward
+dopython=(sys.argv[3]=='1') #dopython = 1 saveuje za BCD u pythonu; = 0 saveuje za BCD u C
 if(backward==0):
     pic2str='1'
 else:
@@ -21,11 +22,9 @@ else:
 
 if(len(picindex)==1):
     picindex='0'+picindex
-
 pic1 = cv2.imread('../data_scene_flow/training/image_2/0000'+picindex+'_1'+backward+'.png')
 pic2 = cv2.imread('../data_scene_flow/training/image_2/0000'+picindex+'_1'+pic2str+'.png')
 
-print('../data_scene_flow/training/image_2/00000'+picindex+'_1'+backward+'.png')
 ''' 
 pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
 pic2 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/B.png')
@@ -198,8 +197,8 @@ def vratiKonacniFlow():
 
 
 def sacuvajPodatke0():
-    np.save('Dobri fajlovi2_b/veliki_baby_flow', vratiKonacniFlow())
-    np.save('Dobri fajlovi2_b/bestlabels', bestlabels)
+    np.save('Daisy output slika backward/veliki_baby_flow', vratiKonacniFlow())
+    np.save('Daisy output slika backward/bestlabels', bestlabels)
 
 
 def nasumicni():
@@ -247,10 +246,10 @@ def nasumicni():
 
 
 def sacuvajPodatke1():
-    np.save('Dobri fajlovi2_b/Flow posle 0 bcd', vratiKonacniFlow())
-    np.save('Dobri fajlovi2_b/proposals_nakon_gausa', proposals)
-    np.save('Dobri fajlovi2_b/lcosts_nakon_gausa', lcosts)
-    np.save('Dobri fajlovi2_b/nprop', nprop)
+    np.save('Daisy output slika backward/Flow posle 0 bcd', vratiKonacniFlow())
+    np.save('Daisy output slika backward/proposals_nakon_gausa', proposals)
+    np.save('Daisy output slika backward/lcosts_nakon_gausa', lcosts)
+    np.save('Daisy output slika backward/nprop', nprop)
 
 
 def pakovanje():
@@ -305,7 +304,7 @@ def pakovanje():
                 tv[0], tv[1], proposals[neiy, neix, 0:nprop[neiy, neix], 0], proposals[neiy, neix, 0:nprop[neiy, neix], 1]))
         packedksets[ty, tx, 0, :maxnprop *
                     maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
-    np.save('Dobri fajlovi2_b/pakovani', packedksets)
+    np.save('Daisy output slika backward/pakovani', packedksets)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
 
 def pripremi_za_oba_pakovanja():
@@ -391,10 +390,10 @@ def pakovanjeZaC():
         if (tx % 2 == 1):
             packedksets2[(picw-1-tx)//2, (pich-1-ty), :maxnprop *
                          maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
-    np.save('Dobri fajlovi2_b/pakovani za c 0', packedksets0)
-    np.save('Dobri fajlovi2_b/pakovani za c 1', packedksets1)
-    np.save('Dobri fajlovi2_b/pakovani za c 2', packedksets2)
-    np.save('Dobri fajlovi2_b/pakovani za c 3', packedksets3)
+    np.save('Daisy output slika backward/pakovani za c 0', packedksets0)
+    np.save('Daisy output slika backward/pakovani za c 1', packedksets1)
+    np.save('Daisy output slika backward/pakovani za c 2', packedksets2)
+    np.save('Daisy output slika backward/pakovani za c 3', packedksets3)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
 # a
 
@@ -418,14 +417,17 @@ print(dt.datetime.now())
 nasumicni()
 print('i ovo')
 print(dt.datetime.now())
+
 sacuvajPodatke1()
 print('sacuvao1')
 print(dt.datetime.now())
-pakovanjeZaC()
-print('spakovao za C')
-print(dt.datetime.now())
-pakovanje()
-print('spakovao za python')
-print(dt.datetime.now())
+if(not dopython):
+    pakovanjeZaC()
+    print('spakovao za C')
+    print(dt.datetime.now())
+if(dopython):
+    pakovanje()
+    print('spakovao za python')
+    print(dt.datetime.now())
 #packedksets = np.load('pakovani3.npy')
 
