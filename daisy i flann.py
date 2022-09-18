@@ -197,8 +197,8 @@ def vratiKonacniFlow():
 
 
 def sacuvajPodatke0():
-    np.save('Daisy output slika backward/veliki_baby_flow', vratiKonacniFlow())
-    np.save('Daisy output slika backward/bestlabels', bestlabels)
+    np.save('Gotova flow slika '+picindex+' backward='+backward+' posle 0 BCD.npy', vratiKonacniFlow())
+    np.save('Bestlabels fajl slike '+picindex+' backward='+backward+' posle 0 BCD.npy', bestlabels)
 
 
 def nasumicni():
@@ -246,10 +246,10 @@ def nasumicni():
 
 
 def sacuvajPodatke1():
-    np.save('Daisy output slika backward/Flow posle 0 bcd', vratiKonacniFlow())
-    np.save('Daisy output slika backward/proposals_nakon_gausa', proposals)
-    np.save('Daisy output slika backward/lcosts_nakon_gausa', lcosts)
-    np.save('Daisy output slika backward/nprop', nprop)
+    #np.save('Daisy output slike '+picindex+' backward='+backward+'/Flow posle 0 bcd', vratiKonacniFlow())
+    np.save('Daisy output slike '+picindex+' backward='+backward+' proposals_nakon_gausa.npy', proposals)
+    np.save('Daisy output slike '+picindex+' backward='+backward+' lcosts_nakon_gausa.npy', lcosts)
+    np.save('Daisy output slike '+picindex+' backward='+backward+' nprop.npy', nprop)
 
 
 def pakovanje():
@@ -304,7 +304,7 @@ def pakovanje():
                 tv[0], tv[1], proposals[neiy, neix, 0:nprop[neiy, neix], 0], proposals[neiy, neix, 0:nprop[neiy, neix], 1]))
         packedksets[ty, tx, 0, :maxnprop *
                     maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
-    np.save('Daisy output slika backward/pakovani', packedksets)
+    np.save('Daisy output slike '+picindex+' backward='+backward+' packedksets.npy', packedksets)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
 
 def pripremi_za_oba_pakovanja():
@@ -312,10 +312,10 @@ def pripremi_za_oba_pakovanja():
     global lcosts
     global nprop
     global bestlabels
-    proposals=np.load('Dobri fajlovi2/proposals_nakon_gausa.npy')
-    lcosts=np.load('Dobri fajlovi2/lcosts_nakon_gausa.npy')
-    nprop=np.load('Dobri fajlovi2/nprop.npy')
-    bestlabels=np.load('Dobri fajlovi2/bestlabels.npy')
+    proposals=np.load('Daisy output slike '+picindex+' backward='+backward+' proposals_nakon_gausa.npy')
+    lcosts=np.load('Daisy output slike '+picindex+' backward='+backward+' lcosts_nakon_gausa.npy')
+    nprop=np.load('Daisy output slike '+picindex+' backward='+backward+' nprop.npy')
+    bestlabels=np.load('Bestlabels fajl slike '+picindex+' backward='+backward+' posle 0 BCD')
 
 def pakovanjeZaC():
     packedksets0 = np.zeros(((picw+1)//2, pich, kdim),dtype=np.uint8)
@@ -390,10 +390,10 @@ def pakovanjeZaC():
         if (tx % 2 == 1):
             packedksets2[(picw-1-tx)//2, (pich-1-ty), :maxnprop *
                          maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
-    np.save('Daisy output slika backward/pakovani za c 0', packedksets0)
-    np.save('Daisy output slika backward/pakovani za c 1', packedksets1)
-    np.save('Daisy output slika backward/pakovani za c 2', packedksets2)
-    np.save('Daisy output slika backward/pakovani za c 3', packedksets3)
+    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 0', packedksets0)
+    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 1', packedksets1)
+    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 2', packedksets2)
+    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 3', packedksets3)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
 # a
 
