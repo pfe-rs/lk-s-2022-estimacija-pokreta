@@ -1,8 +1,18 @@
-from visualization import postProcessing
 from napravi_parove import parovi
-from edge import sed_ivice
+from edge import *
+#from subprocess import run
+import sys
+
+# index = sys.argv[1]
+
+#flow_field je npy file
+flow_field = sys.argv[1]
+parovi(flow_field, "parovi.txt")
 
 
-postProcessing('fildevi/no_bcd_000002_1.npy', 'fildevi/no_bcd_000002_backwards.npy', 'sredjeni_flow.npy')
-parovi('sredjeni_flow.npy', "parovi.txt")
-sed_ivice('../data_scene_flow/training/image_2/000002_11.png', "ivice.bin")
+path_slike = sys.argv[2]
+# path_slike = '../data_scene_flow/training/image_2/' + str(index).zfill(6) +  '_10.png'
+if sys.argv[3]== 'sed':
+    sed_ivice(path_slike, "ivice.bin")
+elif sys.argv[3] == 'canny':
+    canny_ivice(path_slike, "ivice.bin")

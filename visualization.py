@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 from matplotlib.cm import get_cmap
-
-from removeSmallSegments import *
+import sys
+import os
 
 cmap = get_cmap('jet')
 
@@ -88,18 +88,25 @@ class FlowImage:
         fv = np.int64(self.getFlowV(u,v))
         return np.int16(np.sqrt(fv*fv + fu*fu))
 
-    def ucitajFlow(self, flow, tip):
-        self.height, self.width, _= flow.shape
-        self.flow = np.zeros((self.height, self.width,3),  dtype=np.float32)
+    def ucitajFlow(self, path):
+        name, extension = os.path.splitext(path)
 
-        if tip == 'discrete':
+        if extension == '.png':
+            #to je kitti ground truth
+            groundt.readFlowFieldFromImage(path)
+
+        if extension == '.npy':
+            np.load(path)
             for v in range(self.height):
                 for u in range(self.width):
                     self.setFlowU(u,v,flow[v][u][1])
                     self.setFlowV(u,v,flow[v][u][0])
                     self.setValid(u,v,True)
 
-        if tip == 'epik':
+        if extension == '.flo':
+            flow = read_flo_file(path)
+            self.height, self.width, _= flow.shape
+            self.flow = np.zeros((self.height, self.width,3),  dtype=np.float32)
             for v in range(self.height):
                 for u in range(self.width):
                     self.setFlowU(u,v,flow[v][u][0])
@@ -108,7 +115,7 @@ class FlowImage:
     
     
 
-def errorImage(test, ground_t):
+def errorImage(test, ground_t, filename = None):
     ABS_THRESH = 3.0
     #REL_THRESH = 0.05
     num_errors = 0
@@ -132,44 +139,38 @@ def errorImage(test, ground_t):
     errs_np = np.average(np.array(errs))
     print('srednja greska', errs_np)
     print('procenat outliera', num_errors*100/br_valid)
+    if not(filename == None):
+        cv2.imwrite(filename, image)
     cv2.imshow('greska',image)
     
 
-def postProcessing(filename1,filename2, npysave):
-    flow1 = np.load(filename1)
-    flow2 = np.load(filename2)
-
-    test1 = FlowImage()
-    test1.ucitajFlow(flow1, 'discrete')
-
-    test2 = FlowImage()
-    test2.ucitajFlow(flow2, 'discrete')
-
-    removeSmallSegments(test1.flow, 10,100 )
-    fowardBackwardConsistency(test1.flow, test2.flow, 0)
-    np.save(npysave,test1.flow)
-    return test1
-
 #load ground truth
 groundt = FlowImage()
-# kitti ground truh
-groundt.readFlowFieldFromImage("../data_scene_flow/training/flow_noc/000002_10.png")
-
-#ucitaj discrete flow
-# flow = np.load('Dobri fajlovi/bebaflow.npy')
-# test = FlowImage()
-# test.ucitajFlow(flow, 'discrete')
+# kitti ground truh = "../data_scene_flow/training/flow_noc/000002_10.png"
+gt_path = sys.argv[1]
+groundt.ucitajFlow(gt_path)
 
 #ucitaj EpicFlow
-flow = read_flo_file("../epik.flo")
 test = FlowImage()
-test.ucitajFlow(flow, 'epik')
+test_path = sys.argv[2]
+test.ucitajFlow(test_path)
 
-#postprocessing
-# test = postProcessing('fildevi/no_bcd_000002_1.npy', 'fildevi/no_bcd_000002_backwards.npy', 'sredjeni_flow.npy')
+
+# save = sys.argv[3]
+# if save:
+#     name, extension = os.path.splitext(test_path)
+#     path_greske = 'greske/' + name + '.jpg'
+# else: path_greske = None
+
+
+try:
+  path_greske = sys.argv[3]
+except IndexError:
+  path_greske = None
+
 
 test.writeFlowField()
-errorImage(test, groundt)
+errorImage(test, groundt, path_greske)
 # print(flowErrorsOutlier(test, groundt))
 cv2.waitKey(0)
 cv2.destroyAllWindows()

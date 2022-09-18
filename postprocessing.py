@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+from visualization import FlowImage
 
 def removeSmallSegments(flow, tresh, min_segment_size):
     width, height, _ = flow.shape
@@ -93,4 +95,24 @@ def fowardBackwardConsistency(flow1, flow2, tresh):
             for v in range(flow2.shape[1]):
                 consistencyCheck(flow2, flow1, u, v, tresh)
 
+def postProcessing(filename1,filename2, con_tresh, npysave):
+    flow1 = np.load(filename1)
+    flow2 = np.load(filename2)
 
+    test1 = FlowImage()
+    test1.ucitajFlow(flow1, 'discrete')
+
+    test2 = FlowImage()
+    test2.ucitajFlow(flow2, 'discrete')
+    
+    #removeSmallSegments(test1.flow, 10,100 )
+    fowardBackwardConsistency(test1.flow, test2.flow, con_tresh)
+    np.save(npysave,test1.flow)
+    return test1
+
+file1 = sys.argv[1]
+file2 = sys.argv[2]
+con_tresh = sys.argv[3]
+
+
+postProcessing(file1, file2, con_tresh, 'sredjeni_flow.npy')
