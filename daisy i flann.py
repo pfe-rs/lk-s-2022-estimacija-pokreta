@@ -52,7 +52,6 @@ truestime = 0.0
 pic3 = pic1[y:y+pich, x:x+picw, :]
 pic4 = pic2[y:y+pich, x:x+picw, :]
 
-print('a')
 #
 #testdp = (np.full((2*max(pich,picw),150),1000.0)).tolist()
 # print(testdp[0][1])
