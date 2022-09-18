@@ -12,21 +12,10 @@ print(dt.datetime.now())
 
 picindex=sys.argv[1]
 backward=sys.argv[2]
-current_bcd=sys.argv[3]
+bcd_times=int(sys.argv[3])
 if(len(picindex)==1):
     picindex='0'+picindex
-
-
-if(current_bcd=='0' or current_bcd=='1' or current_bcd=='00' or current_bcd=='01'):
-    past_bcd='00'
-else:
-    past_bcd=str(int(current_bcd)-1)
-
-if(len(current_bcd)==1):
-    current_bcd='0'+current_bcd
-
-if(len(past_bcd)==1):
-    past_bcd='0'+past_bcd
+pastw=0
 
 # print(pic1)
 picw = 1242
@@ -50,7 +39,7 @@ truestime = 0.0
 
 descrs1 = np.zeros((pich, picw, 68), dtype=np.float32)
 descrs2 = np.zeros((pich, picw, 68), dtype=np.float32)
-bcd_times = 5
+
 bigtpsi = tpsi+cellw+cellh
 
 ncellx = picw//cellw  # oko 20
@@ -86,7 +75,10 @@ def ucitajSvePodatkeDoBCD():
     nprop = np.load('Daisy output slike '+picindex+' backward='+backward+' nprop.npy')
     packedksets = np.load('Daisy output slike '+picindex+' backward='+backward+' packedksets.npy')
     #bestlabels=np.load('Dobri fajlovi2_b/bestlabels.npy')
-    bestlabels = np.load('Bestlabels fajl slike '+picindex+' backward='+backward+' posle '+past_bcd+' BCD.npy')
+    pastwstr=str(pastw)
+    if(len(pastwstr)==1):
+        pastwstr='0'+pastwstr
+    bestlabels = np.load('Bestlabels fajl slike '+picindex+' backward='+backward+' posle '+pastwstr+' BCD.npy')
 
 
 def sidepsi(y1, x1, label1, y2, x2):
@@ -268,7 +260,8 @@ def bcd(ystep, xstep, ty, tx):
 
 def ceoBCD():
     global bestlabels
-    for w in range(bcd_times):
+    global pastw
+    for w in range(1,bcd_times+1):
         for xloc in range(0, picw, 2):
             bestlabels = bcd(1, 0, 0, xloc)
             # print('a')
@@ -282,10 +275,13 @@ def ceoBCD():
         print('g')
         for yloc in range((pich//2)*2-1, -1, -2):
             bestlabels = bcd(0, 1, yloc, 0)
-
-        np.save('Gotova flow slika '+picindex+' backward='+backward+' posle '+current_bcd+' BCD.npy', vratiKonacniFlow())
-    np.save('Bestlabels fajl slike '+picindex+' backward='+backward+' posle '+current_bcd+' BCD.npy', bestlabels)
-    print('uradjen bcd broj', w)
+        pastw=w
+        wstr=str(w)
+        if(len(wstr)==1):
+            wstr='0'+wstr
+        np.save('Gotova flow slika '+picindex+' backward='+backward+' posle '+wstr+' BCD.npy', vratiKonacniFlow())
+        np.save('Bestlabels fajl slike '+picindex+' backward='+backward+' posle '+wstr+' BCD.npy', bestlabels)
+        print('uradjen bcd broj', w)
 
 
 def sracunajBestlabelsKadNemas():
@@ -293,3 +289,5 @@ def sracunajBestlabelsKadNemas():
         for x in range(picw):
             bestlabels[y, x] = np.argmin(lcosts[y, x, :nprop[y, x]])
     return bestlabels
+ucitajSvePodatkeDoBCD()
+ceoBCD()
