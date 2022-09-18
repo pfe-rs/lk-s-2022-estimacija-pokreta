@@ -15,7 +15,7 @@ flann = fl.FLANN()
 picindex=sys.argv[1]
 backward=sys.argv[2] #u konzoli, 0 znaci forward, 1 znaci backward
 dopython=(sys.argv[3]=='1') #dopython = 1 saveuje za BCD u pythonu; = 0 saveuje za BCD u C
-if(backward==0):
+if(backward=='0'):
     pic2str='1'
 else:
     pic2str='0'
