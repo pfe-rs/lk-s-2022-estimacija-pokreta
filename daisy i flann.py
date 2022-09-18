@@ -350,13 +350,13 @@ def pakovanjeZaC():
             if (tx % 2 == 0):
                 packedksets0[tx//2, ty, :maxnprop*maxnprop] = np.packbits(
                     np.reshape(ksets4[0], maxnprop*maxnprop))
-            if (ty % 2 == 1):
-                packedksets1[ty//2, (picw-1-tx), :maxnprop*maxnprop] = np.packbits(
+            if (ty % 2 == 0):
+                packedksets1[ty//2, (picw-2-tx), :maxnprop*maxnprop] = np.packbits(
                     np.reshape(ksets4[1], maxnprop*maxnprop))
             if (tx % 2 == 1):
-                packedksets2[(picw-1-tx)//2, (pich-1-ty), :maxnprop *
+                packedksets2[(picw-1-tx)//2, (pich-2-ty), :maxnprop *
                              maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
-            if (ty % 2 == 0):
+            if (ty % 2 == 1):
                 packedksets3[(pich-1-ty)//2, tx, :maxnprop *
                              maxnprop] = np.packbits(np.reshape(ksets4[1], maxnprop*maxnprop))
             ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
@@ -369,10 +369,10 @@ def pakovanjeZaC():
             ksets4[1, tl, 0:nprop[neiy, neix]] = (tpsi > purepsi(
                 tv[0], tv[1], proposals[neiy, neix, 0:nprop[neiy, neix], 0], proposals[neiy, neix, 0:nprop[neiy, neix], 1]))
         # packedksets[ty,tx,1,:maxnprop*maxnprop]=np.packbits(np.reshape(ksets4[1],maxnprop*maxnprop))
-        if (ty % 2 == 1):
-            packedksets1[ty//2, (picw-1-tx), :maxnprop*maxnprop] = np.packbits(
-                np.reshape(ksets4[1], maxnprop*maxnprop))
         if (ty % 2 == 0):
+            packedksets1[ty//2, (picw-2-tx), :maxnprop*maxnprop] = np.packbits(
+                np.reshape(ksets4[1], maxnprop*maxnprop))
+        if (ty % 2 == 1):
             packedksets3[(pich-1-ty)//2, tx, :maxnprop *
                          maxnprop] = np.packbits(np.reshape(ksets4[1], maxnprop*maxnprop))
     tx = picw-1
