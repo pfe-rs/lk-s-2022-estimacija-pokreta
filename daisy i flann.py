@@ -197,8 +197,8 @@ def vratiKonacniFlow():
 
 
 def sacuvajPodatke0():
-    np.save('Gotova flow slika '+picindex+' backward='+backward+' posle 0 BCD.npy', vratiKonacniFlow())
-    np.save('Bestlabels fajl slike '+picindex+' backward='+backward+' posle 0 BCD.npy', bestlabels)
+    np.save('Gotova flow slika '+picindex+' backward='+backward+' posle 00 BCD.npy', vratiKonacniFlow())
+    np.save('Bestlabels fajl slike '+picindex+' backward='+backward+' posle 00 BCD.npy', bestlabels)
 
 
 def nasumicni():
