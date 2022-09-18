@@ -305,10 +305,10 @@ def pakovanje():
 
 
 def pakovanjeZaC():
-    packedksets0 = np.zeros(((picw+1)//2, pich, kdim))
-    packedksets1 = np.zeros(((pich+1)//2, picw, kdim))
-    packedksets2 = np.zeros(((picw+1)//2, pich, kdim))
-    packedksets3 = np.zeros(((pich+1)//2, picw, kdim))
+    packedksets0 = np.zeros(((picw+1)//2, pich, kdim),dtype=np.uint8)
+    packedksets1 = np.zeros(((pich+1)//2, picw, kdim),dtype=np.uint8)
+    packedksets2 = np.zeros(((picw+1)//2, pich, kdim),dtype=np.uint8)
+    packedksets3 = np.zeros(((pich+1)//2, picw, kdim),dtype=np.uint8)
     # gornji za mene, levi za mene, moj za donji, moj za desni (smrt)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
     for ty in range(pich-1):
@@ -432,7 +432,15 @@ print('.')
 #    for qj in range(maxnprop):
 #        mat1[qi,qj]=qi
 #        mat2[qi,qj]=qj
-
+def pripremi_za_oba_pakovanja():
+    global proposals
+    global lcosts
+    global nprop
+    global bestlabels
+    proposals=np.load('Dobri fajlovi2/proposals_nakon_gausa.npy')
+    lcosts=np.load('Dobri fajlovi2/lcosts_nakon_gausa.npy')
+    nprop=np.load('Dobri fajlovi2/nprop.npy')
+    bestlabels=np.load('Dobri fajlovi2/bestlabels.npy')
 
 def bcd(ystep, xstep, ty, tx):
     global unpacktime
