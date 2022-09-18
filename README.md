@@ -24,12 +24,13 @@ Za "python bcd.py" postoji 3 parametra:
 
 Dakle za jedan par slika (npr. par broj 6 u bazi podataka) bi poziv izgledao ovako:
 
+Obrađivanje unapred:
 
 python "daisy i flann.py" 6 0 1
 
 python "bcd.py" 6 0 4
 
-
+Obrađivanje unazad:
 
 python "daisy i flann.py" 6 1 1
 
