@@ -388,7 +388,7 @@ def pakovanjeZaC():
             packedksets0[tx//2, ty, :maxnprop *
                          maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
         if (tx % 2 == 1):
-            packedksets2[(picw-1-tx)//2, (pich-1-ty), :maxnprop *
+            packedksets2[(picw-1-tx)//2, (pich-2-ty), :maxnprop *
                          maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
     np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 0', packedksets0)
     np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 1', packedksets1)
