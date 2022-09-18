@@ -117,7 +117,7 @@ def bcd(ystep, xstep, ty, tx):
                   1000, dtype=int)).tolist()
     for tl in range(nprop[ty, tx]):
         dp[0, tl] = sidepsi(ty, tx, tl, ty+yside, tx+xside) + \
-            sidepsi(ty, tx, tl, ty-yside, tx-xside) + lcosts[ty, tx, tl]
+            sidepsi(ty, tx, tl, ty-yside, tx-xside) + lamda*lcosts[ty, tx, tl]
     while (True):
         # ksets je prosli u DP
         #
