@@ -38,3 +38,13 @@ python "bcd.py" 6 1 4
 
 
 Obrađivanje unapred i unazad su nezavisni procesi i mogu se paralelizovati 
+
+"visualisation.py":  u srednja_greska.txt i procenat_ooutliera.txt cuva metriku 
+
+Parametri:
+
+(1) path fajla sa ground truthom
+
+(2) path fajla ciji se flow field testira
+
+(3) (opciono) path gde se cuva vizuelna reprezentacija slike kao .jpg fajl
