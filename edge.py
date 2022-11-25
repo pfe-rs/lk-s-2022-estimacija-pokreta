@@ -8,9 +8,9 @@ def sed_ivice(fileslike, binfile):
     edges = edgedetector.detectEdges(np.float32(src) / 255.0)
     inverted_edges = (1 - edges) 
 
-    print(inverted_edges)
-    cv2.imshow("edges", inverted_edges)
-    cv2.waitKey(0)
+    # print(inverted_edges)
+    # cv2.imshow("edges", inverted_edges)
+    # cv2.waitKey(0)
 
     f= open(binfile,"wb")
     f.write(inverted_edges)
@@ -27,8 +27,8 @@ def canny_ivice(fileslike, binfile):
 
     inverted_edges1 = np.array((255 - edges)/255, dtype='float32')
     #inverted_edges1 = np.copy(inverted_edges.transpose(), order='C') 
-    cv2.imshow('Canny Edge Detection', inverted_edges1)
-    cv2.waitKey(0)
+    # cv2.imshow('Canny Edge Detection', inverted_edges1)
+    # cv2.waitKey(0)
 
     #print(inverted_edges)
     f= open(binfile,"wb")
