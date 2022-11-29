@@ -1,6 +1,30 @@
 import numpy as np
 import sys
-from visualization import FlowImage
+import os
+
+class FlowImage:
+
+    def ucitajFlow(self, path):
+        name, extension = os.path.splitext(path)
+        if extension == '.npy':
+            flow = np.load(path)
+            self.height, self.width, _= flow.shape
+            self.flow = np.zeros((self.height, self.width,3),  dtype=np.float32)
+            for v in range(self.height):
+                for u in range(self.width):
+                    self.setFlowU(u,v,flow[v][u][1])
+                    self.setFlowV(u,v,flow[v][u][0])
+                    self.setValid(u,v,True)
+    def setFlowU(self, u,v,val):
+        self.flow[v][u][0] = val
+
+    def setFlowV (self,u,v,val):
+        self.flow[v][u][1] = val
+    
+    def setValid(self, u,v,val):
+        if val: self.flow[v][u][2]=1
+        else: self.flow[v][u][2] = 0
+
 
 def removeSmallSegments(flow, tresh, min_segment_size):
     width, height, _ = flow.shape
@@ -58,22 +82,23 @@ def consistencyCheck(flow1, flow2, u1, v1, tresh):
 
     #ako nije validan
     if not(flow1[u1][v1][2]> 0.5):
-        return
+        return 
 
     u2 = int(flow1[u1][v1][0] + u1)
     v2 = int(flow1[u1][v1][1] + v1)
 
     if (u2<0 or v2<0 or u2>=width or v2>= height):
+        
         flow1[u1][v1][0] = 0
         flow1[u1][v1][1] = 0
         flow1[u1][v1][2] = 0
-        return
+        return 
     
     if not(flow2[u2][v2][2]> 0.5):
         flow1[u1][v1][0] = 0
         flow1[u1][v1][1] = 0
         flow1[u1][v1][2] = 0
-        return
+        return 
 
     du = flow1[u1][v1][0] + flow2[u2][v2][0]
     dv = flow1[u1][v1][1] + flow2[u2][v2][1]
@@ -82,7 +107,7 @@ def consistencyCheck(flow1, flow2, u1, v1, tresh):
         flow1[u1][v1][0] = 0
         flow1[u1][v1][1] = 0
         flow1[u1][v1][2] = 0
-        return
+    return 
 
 
 
@@ -91,28 +116,27 @@ def fowardBackwardConsistency(flow1, flow2, tresh):
             for v in range(flow1.shape[1]):
                 consistencyCheck(flow1, flow2, u, v, tresh)
 
-    for u in range(flow2.shape[0]):
-            for v in range(flow2.shape[1]):
-                consistencyCheck(flow2, flow1, u, v, tresh)
+    # for u in range(flow2.shape[0]):
+    #         for v in range(flow2.shape[1]):
+    #             consistencyCheck(flow2, flow1, u, v, tresh)
 
 def postProcessing(filename1,filename2, con_tresh, npysave):
-    flow1 = np.load(filename1)
-    flow2 = np.load(filename2)
 
     test1 = FlowImage()
-    test1.ucitajFlow(flow1, 'discrete')
+    test1.ucitajFlow(filename1)
+
 
     test2 = FlowImage()
-    test2.ucitajFlow(flow2, 'discrete')
-    
+    test2.ucitajFlow(filename2)
+
     #removeSmallSegments(test1.flow, 10,100 )
     fowardBackwardConsistency(test1.flow, test2.flow, con_tresh)
     np.save(npysave,test1.flow)
     return test1
 
-file1 = sys.argv[1]
-file2 = sys.argv[2]
-con_tresh = sys.argv[3]
+# file1 = sys.argv[1]
+# file2 = sys.argv[2]
+# con_tresh = int(sys.argv[3])
 
 
-postProcessing(file1, file2, con_tresh, 'sredjeni_flow.npy')
+# postProcessing(file1, file2, con_tresh, 'sredjeni_flow.npy')

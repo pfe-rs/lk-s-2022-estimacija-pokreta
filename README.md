@@ -38,3 +38,30 @@ python "bcd.py" 6 1 4
 
 
 Obrađivanje unapred i unazad su nezavisni procesi i mogu se paralelizovati 
+
+"visualisation.py":  u srednja_greska.txt i procenat_outliera.txt cuva metriku 
+
+Parametri:
+
+(1) path fajla sa ground truthom
+
+(2) path fajla ciji se flow field testira
+
+(3) (opciono) path gde se cuva vizuelna reprezentacija slike kao .jpg fajl
+
+"spremiZaEpic.py" : Pokrece postprocessing( koji sada samo izvrava consistencyCheck), racuna argumente potrebne za EpicFlow (pronalazi ivice slike i pravi txt fajl u kome u svakom redu nalazi po 2 para koordinata koji opisuju prelazak jedne slike u drugu)
+i pokrece EpicFlow
+
+Parametri:
+
+(1) path referentne slike
+
+(2) path ciljane slike
+
+(3) flow field unapred
+
+(4) flow field unazad
+
+(5) consistency threshold (u ref radu =10)
+
+(6) vrsta algoritma pronalazenja ivica (sed ili canny)

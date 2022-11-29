@@ -37,7 +37,6 @@ class FlowImage:
     def readFlowFieldFromImage(self, file_name):
         img = cv2.imread(file_name, -1)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        #img = crop(img, 700, 122, 240, 100)
 
         self.height, self.width,  _ = img.shape
         self.flow = np.zeros(( self.height, self.width, 3),  dtype=np.float32)
@@ -74,13 +73,13 @@ class FlowImage:
         return self.flow[v][u][1]
 
     def writeFlowField(self):
-        #ispravnije je 16 ali 8 je vise kyl
         image = np.zeros((self.height, self.width,3),  dtype=np.uint16)
         for v in range (self.height):
             for u in range(self.width):
                 if self.isValid(u,v):
                     image[v][u] = [self.getFlowU(u,v)*64.0+32768, self.getFlowV(u,v)*64.0+32768, 1]
         cv2.imshow('flofi',cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        cv2.imwrite('flow_field.png', image)
 
 
     def getFlowMagnitude(self,u,v):
@@ -93,15 +92,26 @@ class FlowImage:
 
         if extension == '.png':
             #to je kitti ground truth
-            groundt.readFlowFieldFromImage(path)
+            self.readFlowFieldFromImage(path)
 
         if extension == '.npy':
-            np.load(path)
-            for v in range(self.height):
-                for u in range(self.width):
-                    self.setFlowU(u,v,flow[v][u][1])
-                    self.setFlowV(u,v,flow[v][u][0])
-                    self.setValid(u,v,True)
+            flow = np.load(path)
+            self.height, self.width, x= flow.shape
+            self.flow = np.zeros((self.height, self.width,3),  dtype=np.float32)
+            if (x == 3):
+                for v in range(self.height):
+                    for u in range(self.width):
+                        #print(flow[v][u])
+                        self.setFlowU(u,v,flow[v][u][1])
+                        self.setFlowV(u,v,flow[v][u][0])
+                        self.setValid(u,v,flow[v][u][2])
+            else:
+                for v in range(self.height):
+                    for u in range(self.width):
+                        #print(flow[v][u])
+                        self.setFlowU(u,v,flow[v][u][1])
+                        self.setFlowV(u,v,flow[v][u][0])
+                        self.setValid(u,v,True)
 
         if extension == '.flo':
             flow = read_flo_file(path)
@@ -124,8 +134,7 @@ def errorImage(test, ground_t, filename = None):
     errs = []
     for v in range(ground_t.height):
         for u in range(ground_t.width):
-            if ground_t.isValid(u,v):
-                #and test.isValid(u,v)
+            if ground_t.isValid(u,v) and test.isValid(u,v):
                 dfu = test.getFlowU(u,v) - ground_t.getFlowU(u,v)
                 dfv = test.getFlowV(u,v) - ground_t.getFlowV(u,v)
                 f_err = np.sqrt(dfu*dfu + dfv*dfv)
@@ -137,31 +146,45 @@ def errorImage(test, ground_t, filename = None):
                 if f_err>ABS_THRESH:
                     num_errors+=1
     errs_np = np.average(np.array(errs))
-    print('srednja greska', errs_np)
-    print('procenat outliera', num_errors*100/br_valid)
+    with open('srednja_greska.txt', 'a+', encoding='utf-8') as f:
+        f.write(str(errs_np)+ '\n')
+    with open('procenat_outliera.txt', 'a+', encoding='utf-8') as f:
+        f.write(str(num_errors*100/br_valid)+ '\n')
+    # print('srednja greska', errs_np)
+    # print('procenat outliera', num_errors*100/br_valid)
     if not(filename == None):
         cv2.imwrite(filename, image)
-    cv2.imshow('greska',image)
+    # cv2.imshow('greska',image)
     
+# def reverse(flow):
+#     reversed = FlowImage()
+#     reversed.flow = np.zeros((flow.shape[0], flow.shape[1],3),  dtype=np.float32)
+#     for v in range(flow.shape[0]):
+#         for u in range(flow.shape[1]):
+#             u2 = int(flow[v][u][1] + u)
+#             v2 = int(flow[v][u][0] + v)
+#             #print(flow[v][u])
+#             reversed.setFlowU(u2,v2,-flow[v][u][1])
+#             reversed.setFlowV(u2,v2,-flow[v][u][0])
+#             reversed.setValid(u2,v2,flow[v][u][2])
+#     return reversed
 
 #load ground truth
 groundt = FlowImage()
 # kitti ground truh = "../data_scene_flow/training/flow_noc/000002_10.png"
 gt_path = sys.argv[1]
 groundt.ucitajFlow(gt_path)
+# flowr = reverse(groundt.flow)
+# obrnut = FlowImage()
+# obrnut.height, obrnut.width, _ = flowr.shape
+# obrnut.flow = flowr
 
 #ucitaj EpicFlow
 test = FlowImage()
 test_path = sys.argv[2]
 test.ucitajFlow(test_path)
 
-
-# save = sys.argv[3]
-# if save:
-#     name, extension = os.path.splitext(test_path)
-#     path_greske = 'greske/' + name + '.jpg'
-# else: path_greske = None
-
+#obrnut = reverse(test.flow)
 
 try:
   path_greske = sys.argv[3]
@@ -169,8 +192,7 @@ except IndexError:
   path_greske = None
 
 
-test.writeFlowField()
+# test.writeFlowField()
 errorImage(test, groundt, path_greske)
-# print(flowErrorsOutlier(test, groundt))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
