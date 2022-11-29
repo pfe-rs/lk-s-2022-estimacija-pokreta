@@ -12,7 +12,8 @@ print(dt.datetime.now())
 
 flann = fl.FLANN()
 
-picindex=sys.argv[1]
+#Sad je od 100 do 199 !!
+picindex=sys.argv[1] 
 backward=sys.argv[2] #u konzoli, 0 znaci forward, 1 znaci backward
 dopython=(sys.argv[3]=='1') #dopython = 1 saveuje za BCD u pythonu; = 0 saveuje za BCD u C
 if(backward=='0'):
@@ -22,8 +23,8 @@ else:
 
 if(len(picindex)==1):
     picindex='0'+picindex
-pic1 = cv2.imread('../data_scene_flow/training/image_2/0000'+picindex+'_1'+backward+'.png')
-pic2 = cv2.imread('../data_scene_flow/training/image_2/0000'+picindex+'_1'+pic2str+'.png')
+pic1 = cv2.imread('../data_scene_flow/training/image_2/0001'+picindex+'_1'+backward+'.png')
+pic2 = cv2.imread('../data_scene_flow/training/image_2/0001'+picindex+'_1'+pic2str+'.png')
 
 ''' 
 pic1 = cv2.imread('C:/Users/JovNov/Desktop/Estimacija Pokreta/slicice/A.png')
@@ -197,8 +198,8 @@ def vratiKonacniFlow():
 
 
 def sacuvajPodatke0():
-    np.save('Gotova flow slika '+picindex+' backward='+backward+' posle 00 BCD.npy', vratiKonacniFlow())
-    np.save('Bestlabels fajl slike '+picindex+' backward='+backward+' posle 00 BCD.npy', bestlabels)
+    np.save('Gotova flow slika 1'+picindex+' backward='+backward+' posle 00 BCD.npy', vratiKonacniFlow())
+    np.save('Bestlabels fajl slike 1'+picindex+' backward='+backward+' posle 00 BCD.npy', bestlabels)
 
 
 def nasumicni():
@@ -247,9 +248,9 @@ def nasumicni():
 
 def sacuvajPodatke1():
     #np.save('Daisy output slike '+picindex+' backward='+backward+'/Flow posle 0 bcd', vratiKonacniFlow())
-    np.save('Daisy output slike '+picindex+' backward='+backward+' proposals_nakon_gausa.npy', proposals)
-    np.save('Daisy output slike '+picindex+' backward='+backward+' lcosts_nakon_gausa.npy', lcosts)
-    np.save('Daisy output slike '+picindex+' backward='+backward+' nprop.npy', nprop)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' proposals_nakon_gausa.npy', proposals)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' lcosts_nakon_gausa.npy', lcosts)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' nprop.npy', nprop)
 
 
 def pakovanje():
@@ -304,7 +305,7 @@ def pakovanje():
                 tv[0], tv[1], proposals[neiy, neix, 0:nprop[neiy, neix], 0], proposals[neiy, neix, 0:nprop[neiy, neix], 1]))
         packedksets[ty, tx, 0, :maxnprop *
                     maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
-    np.save('Daisy output slike '+picindex+' backward='+backward+' packedksets.npy', packedksets)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' packedksets.npy', packedksets)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
 
 def pripremi_za_oba_pakovanja():
@@ -312,10 +313,10 @@ def pripremi_za_oba_pakovanja():
     global lcosts
     global nprop
     global bestlabels
-    proposals=np.load('Daisy output slike '+picindex+' backward='+backward+' proposals_nakon_gausa.npy')
-    lcosts=np.load('Daisy output slike '+picindex+' backward='+backward+' lcosts_nakon_gausa.npy')
-    nprop=np.load('Daisy output slike '+picindex+' backward='+backward+' nprop.npy')
-    bestlabels=np.load('Bestlabels fajl slike '+picindex+' backward='+backward+' posle 00 BCD.npy')
+    proposals=np.load('Daisy output slike 1'+picindex+' backward='+backward+' proposals_nakon_gausa.npy')
+    lcosts=np.load('Daisy output slike 1'+picindex+' backward='+backward+' lcosts_nakon_gausa.npy')
+    nprop=np.load('Daisy output slike 1'+picindex+' backward='+backward+' nprop.npy')
+    bestlabels=np.load('Bestlabels fajl slike 1'+picindex+' backward='+backward+' posle 00 BCD.npy')
 
 def pakovanjeZaC():
     packedksets0 = np.zeros(((picw+1)//2, pich, kdim),dtype=np.uint8)
@@ -390,10 +391,10 @@ def pakovanjeZaC():
         if (tx % 2 == 1):
             packedksets2[(picw-1-tx)//2, (pich-2-ty), :maxnprop *
                          maxnprop] = np.packbits(np.reshape(ksets4[0], maxnprop*maxnprop))
-    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 0', packedksets0)
-    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 1', packedksets1)
-    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 2', packedksets2)
-    np.save('Daisy output slike '+picindex+' backward='+backward+' pakovani za c 3', packedksets3)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' pakovani za c 0', packedksets0)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' pakovani za c 1', packedksets1)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' pakovani za c 2', packedksets2)
+    np.save('Daisy output slike 1'+picindex+' backward='+backward+' pakovani za c 3', packedksets3)
     ksets4 = np.zeros((4, maxnprop, maxnprop), dtype=bool)
 # a
 

@@ -70,15 +70,15 @@ def ucitajSvePodatkeDoBCD():
     global nprop
     global packedksets
     global bestlabels
-    proposals = np.load('Daisy output slike '+picindex+' backward='+backward+' proposals_nakon_gausa.npy')
-    lcosts = np.load('Daisy output slike '+picindex+' backward='+backward+' lcosts_nakon_gausa.npy')
-    nprop = np.load('Daisy output slike '+picindex+' backward='+backward+' nprop.npy')
-    packedksets = np.load('Daisy output slike '+picindex+' backward='+backward+' packedksets.npy')
+    proposals = np.load('Daisy output slike 1'+picindex+' backward='+backward+' proposals_nakon_gausa.npy')
+    lcosts = np.load('Daisy output slike 1'+picindex+' backward='+backward+' lcosts_nakon_gausa.npy')
+    nprop = np.load('Daisy output slike 1'+picindex+' backward='+backward+' nprop.npy')
+    packedksets = np.load('Daisy output slike 1'+picindex+' backward='+backward+' packedksets.npy')
     #bestlabels=np.load('Dobri fajlovi2_b/bestlabels.npy')
     pastwstr=str(pastw)
     if(len(pastwstr)==1):
         pastwstr='0'+pastwstr
-    bestlabels = np.load('Bestlabels fajl slike '+picindex+' backward='+backward+' posle '+pastwstr+' BCD.npy')
+    bestlabels = np.load('Bestlabels fajl slike 1'+picindex+' backward='+backward+' posle '+pastwstr+' BCD.npy')
 
 
 def sidepsi(y1, x1, label1, y2, x2):
@@ -279,8 +279,8 @@ def ceoBCD():
         wstr=str(w)
         if(len(wstr)==1):
             wstr='0'+wstr
-        np.save('Gotova flow slika '+picindex+' backward='+backward+' posle '+wstr+' BCD.npy', vratiKonacniFlow())
-        np.save('Bestlabels fajl slike '+picindex+' backward='+backward+' posle '+wstr+' BCD.npy', bestlabels)
+        np.save('Gotova flow slika 1'+picindex+' backward='+backward+' posle '+wstr+' BCD.npy', vratiKonacniFlow())
+        np.save('Bestlabels fajl slike 1'+picindex+' backward='+backward+' posle '+wstr+' BCD.npy', bestlabels)
         print('uradjen bcd broj', w)
 
 
