@@ -18,7 +18,7 @@ if(len(picindex)==1):
 pastw=0
 
 # print(pic1)
-picw = 1242
+picw = 1241
 pich = 375
 # picw=240
 # pich=125
@@ -26,7 +26,7 @@ pich = 375
 x = 0
 #y = 122
 y = 0
-cellw = 54
+cellw = 73
 cellh = 25
 # cellw=50
 # cellh=25
